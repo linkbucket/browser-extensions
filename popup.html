@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Save to Linkbucket</title>
+    <style>
+      body { font-family: Arial, sans-serif; width: 300px; padding: 10px; }
+      input, button { width: 100%; margin-top: 10px; }
+      #resetKeys { margin-top: 10px; font-size: 12px; background: none; border: none; color: blue; text-decoration: underline; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <h3>Save URL to Linkbucket</h3>
+
+    <!-- Key entry form -->
+    <form id="key-form" style="display:none;">
+      <label for="accessKeyId">Access Key ID:</label>
+      <input type="text" id="accessKeyId" name="accessKeyId" placeholder="Enter your Access Key ID"/>
+      <label for="secretKey">Secret Key:</label>
+      <input type="password" id="secretKey" name="secretKey" placeholder="Enter your Secret Key"/>
+      <button type="submit">Save Keys</button>
+    </form>
+
+    <!-- URL save form -->
+    <form id="url-form" style="display:none;">
+      <label for="url">URL:</label>
+      <input type="text" id="url" name="url"/>
+      <button type="submit">Save</button>
+      <button id="resetKeys" type="button">Change API Keys</button>
+    </form>
+
+    <div id="result" class="small"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>
