@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (response.ok) {
-          resultDiv.textContent = "Success! URL saved.";
+          resultDiv.textContent = "Success! Link added.";
         } else {
           const errorText = await response.text();
           resultDiv.textContent = `Error ${response.status}: ${response.statusText}. ${errorText}`;
