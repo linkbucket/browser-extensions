@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Save to Linkbucket</title>
     <style>
       body { font-family: Arial, sans-serif; width: 300px; padding: 10px; }
       input, button { width: 100%; margin-top: 10px; }
       #resetKeys { margin-top: 10px; font-size: 12px; background: none; border: none; color: blue; text-decoration: underline; cursor: pointer; }
     </style>
+    <title>Linkbucket</title>
   </head>
   <body>
-    <h3>Save URL to Linkbucket</h3>
+    <h3>Add to Linkbucket</h3>
 
     <!-- Key entry form -->
     <form id="key-form" style="display:none;">
@@ -22,9 +22,9 @@
 
     <!-- URL save form -->
     <form id="url-form" style="display:none;">
-      <label for="url">URL:</label>
+      <label for="url">Link</label>
       <input type="text" id="url" name="url"/>
-      <button type="submit">Save</button>
+      <button type="submit">Add link</button>
       <button id="resetKeys" type="button">Change API Keys</button>
     </form>
 
