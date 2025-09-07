@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Linkbucket App",
+  "name": "Linkbucket",
   "short_name": "Linkbucket",
   "version": "0.1.0",
   "description": "Add links to your Linkbucket account quickly from the browser.",
