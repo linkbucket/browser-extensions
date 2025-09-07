@@ -80,7 +80,7 @@ The Linkbucket Chrome Extension streamlines adding links to your Linkbucket acco
 - Simple, review-friendly code structure.
 
 ## 8. Managing API Keys
-- Use the "Change API keys' button in the popup to rotate or clear the stored credentials.
+- Use the "Change API keys" button in the popup to rotate or clear the stored credentials.
 - Uninstalling the extension removes all local stored data.
 
 ## 9. Troubleshooting
@@ -101,25 +101,19 @@ The Linkbucket Chrome Extension streamlines adding links to your Linkbucket acco
 **Q:** Can I use multiple Linkbucket accounts?
 **A:** Not simultaneously; you can swap credentials using "Change API keys".
 
-## 11. Roadmap (Planned Ideas)
-- Tag assignment field.
-- Keyboard shortcut (e.g., Ctrl+Shift+L) for instant capture.
-- Bulk import / multi-save.
-- Sync (optional opt-in) for cross-device credentials (pending security review).
-- Context menu "Save to Linkbucket".
+## 11. License
+Currently: Proprietary (All rights reserved).
+Considering open-sourcing under MIT or Apache-2.0. (To proceed: add LICENSE file + adjust notices.)
 
-## 12. License
-Proprietary (All rights reserved).
-
-## 13. Third-Party Assets / Notices
+## 12. Third-Party Assets / Notices
 - Work Sans font (SIL Open Font License 1.1). See `fonts/NOTICE` and `fonts/OFL-1.1.txt`.
 
-## 14. Support & Contact
+## 13. Support & Contact
 - Homepage: https://linkbucket.app
 - Privacy (Extension): https://linkbucket.app/chrome-extension-privacy
 - Email: hello@linkbucket.app
 
-## 15. Changelog
+## 14. Changelog
 - 0.1.0: Initial release.
 
 ---
