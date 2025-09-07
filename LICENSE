@@ -1,0 +1,51 @@
+Linkbucket Chrome Extension
+Copyright (c) 2025 Linkbucket. All rights reserved.
+
+PROPRIETARY LICENSE
+
+1. Ownership
+   The source code, assets, and related materials of the Linkbucket Chrome Extension
+   ("Software") are the exclusive property of Linkbucket. No ownership rights are
+   transferred to any user or third party by virtue of accessing the repository,
+   receiving a copy, or installing the compiled extension.
+
+2. Permitted Use
+   You are granted a limited, revocable, non-transferable license to:
+   - Install and use the compiled Chrome Extension for personal or internal business purposes.
+   - Review the source code privately (if access has been explicitly granted to you).
+   No other rights are granted unless provided in a separate written agreement.
+
+3. Restrictions
+   Except where mandatory law overrides the following, you may NOT:
+   - Distribute, sublicense, sell, lease, or host the Software or substantial portions of it.
+   - Modify and redistribute modified versions.
+   - Remove or alter proprietary notices.
+   - Use any names, logos, or trademarks of Linkbucket to imply endorsement.
+
+4. No Warranty
+   THE SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+   PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+5. Limitation of Liability
+   IN NO EVENT SHALL LINKBUCKET BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
+   CONSEQUENTIAL OR EXEMPLARY DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+   THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+6. Termination
+   Any breach of this license terminates your rights immediately. Upon termination
+   you must cease all use and (if applicable) destroy any local source copies.
+
+7. Future Open Source Option
+   Linkbucket may, at its sole discretion, relicense this Software under an open
+   source license in the future. Until such a change is published in this file
+   (and version-controlled), this proprietary license governs all use.
+
+8. Third-Party Components
+   This product bundles third-party component(s) under their own licenses:
+   - Work Sans font — Copyright (c) 2014–2024 Wei Huang and contributors.
+     Licensed under the SIL Open Font License 1.1 (OFL). See fonts/OFL-1.1.txt
+     and fonts/NOTICE for details. The OFL terms apply to the font files only.
+
+9. Contact
+   For licensing inquiries: hello@linkbucket.app
