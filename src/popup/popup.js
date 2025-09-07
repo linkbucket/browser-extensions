@@ -1,3 +1,30 @@
+/**
+ * Reviewer / Maintainer Note:
+ * We use chrome.storage.local to persist the user's Linkbucket API key + secret so
+ * they only have to enter them once. No other data (like browsing history) is stored.
+ *
+ * Why not sync storage? Keys are considered sensitive; keeping them local avoids
+ * unintended propagation across devices. Users can remove or rotate credentials
+ * via the "Change API keys" UI, which overwrites the stored values (or clears them).
+ *
+ * Permissions rationale (mirrors manifest + store listing):
+ * - "storage": Persist user-supplied API credentials locally.
+ * - "activeTab": Only accessed after the user clicks the extension icon; used to
+ *   pre-fill the URL field with the current tab's URL as a convenience. We do not
+ *   inspect or modify page content.
+ * - "host_permissions": Restricted to https://linkbucket.app/api/* ensuring we
+ *   only communicate with the official Linkbucket backend over HTTPS.
+ *
+ * Privacy & Security:
+ * - No analytics, tracking scripts, or remote code loading.
+ * - No console logging of credentials or saved links.
+ * - Fonts (Work Sans) are bundled locally; no external font requests.
+ * - Network calls are limited to the Linkbucket API endpoint.
+ *
+ * If you are a reviewer: please feel free to search for "console." or "eval"-
+ * they are intentionally absent. We aim for minimal surface area and clarity.
+ */
+
 document.addEventListener("DOMContentLoaded", () => {
   const keyForm = document.getElementById("key-form");
   const urlForm = document.getElementById("url-form");
