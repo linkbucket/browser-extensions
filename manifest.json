@@ -18,5 +18,13 @@
     },
     "default_popup": "src/popup/popup.html"
   },
-  "permissions": ["storage", "activeTab"]
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://linkbucket.app/api/*"
+  ],
+  "homepage_url": "https://linkbucket.app",
+  "author": "Linkbucket Team"
 }
