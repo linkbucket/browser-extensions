@@ -151,7 +151,7 @@ button[type="submit"]:focus {
   min-height: 18px;
 }
 
-/* Optional subtle fade-in when forms are revealed */
+/* Subtle fade-in when forms are revealed */
 form[style*="display:none"] {
   opacity: 0;
 }
