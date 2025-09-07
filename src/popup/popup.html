@@ -1,30 +1,65 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
     <title>Linkbucket</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <h3>Add to Linkbucket</h3>
+    <img src="/assets/images/skate-bucky.svg" alt="Linkbucket logo" />
+    <h1>Save to Linkbucket</h1>
 
     <!-- Key entry form -->
     <form id="key-form" style="display:none;">
-      <label for="accessKeyId">Access Key ID:</label>
-      <input type="text" id="accessKeyId" name="accessKeyId" placeholder="Enter your Access Key ID"/>
-      <label for="secretKey">Secret Key:</label>
-      <input type="password" id="secretKey" name="secretKey" placeholder="Enter your Secret Key"/>
-      <button type="submit">Save Keys</button>
+      <label for="accessKeyId">Access Key ID</label>
+      <input
+        type="text"
+        id="accessKeyId"
+        name="accessKeyId"
+        spellcheck="false"
+        autocorrect="off"
+        autocapitalize="off"
+        autocomplete="off"
+        inputmode="none"
+        required
+      />
+      <label for="secretKey">Secret Key</label>
+      <input
+        type="password"
+        id="secretKey"
+        name="secretKey"
+        spellcheck="false"
+        autocorrect="off"
+        autocapitalize="off"
+        autocomplete="off"
+        inputmode="none"
+        required
+      />
+      <div class="actions">
+        <button type="submit">Save keys</button>
+      </div>
     </form>
 
     <!-- URL save form -->
     <form id="url-form" style="display:none;">
-      <label for="url">Link</label>
-      <input type="text" id="url" name="url"/>
-      <button type="submit">Add link</button>
-      <button id="resetKeys" type="button">Change API Keys</button>
+      <label for="url">URL</label>
+      <input
+        type="url"
+        name="url"
+        id="url"
+        pattern="https://.*"
+        spellcheck="false"
+        autocorrect="off"
+        autocapitalize="off"
+        required
+      />
+      <div class="actions">
+        <button id="resetKeys" type="button">Change API Keys</button>
+        <button type="submit">Save link</button>
+      </div>
     </form>
 
     <div id="result" class="small"></div>
-    <script src="popup.js"></script>
+    <script type="module" src="popup.js"></script>
   </body>
 </html>

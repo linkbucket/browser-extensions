@@ -1,3 +1,166 @@
-body { font-family: Arial, sans-serif; width: 300px; padding: 10px; }
-input, button { width: 100%; margin-top: 10px; }
-#resetKeys { margin-top: 10px; font-size: 12px; background: none; border: none; color: blue; text-decoration: underline; cursor: pointer; }
+@font-face {
+  font-family: 'Work Sans';
+  font-weight: normal;
+  src: local('Work Sans'), url('/assets/fonts/WorkSans-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Work Sans';
+  font-weight: bold;
+  src: local('Work Sans'), url('/assets/fonts/WorkSans-Bold.woff2') format('woff2');
+}
+
+:root {
+  --fs-base: 16px;
+  --fs-input: 16px;
+  --color-bg: hsla(43, 30%, 95%, 1);
+  --color-border: #000;
+  --color-accent: #FFAA8E;
+  --color-accent-hover: #FF9877;
+  --radius-input: 8px;
+  --radius-button: 25px;
+  --space-form-gap: 10px;
+  --space-label-top: 18px;
+  --space-label-bottom: 6px;
+  --space-actions-top: 18px;
+}
+
+/* Reset / base */
+*, *::before, *::after { box-sizing: border-box; }
+input, button, select, textarea { font: inherit; }
+
+body {
+  width: 470px;
+  padding: 0 1.5rem 1.25rem;
+  margin: 0;
+  background: var(--color-bg);
+  font-family: 'Work Sans', sans-serif;
+  font-size: var(--fs-base);
+}
+
+h1 {
+  color: black;
+  font-size: 22px;
+  font-style: normal;
+  margin: 0 0 1rem;
+}
+
+img {
+  display: block;
+  margin: 1rem auto 0.5rem;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Space between each label+input pair is handled by label top margin */
+form label {
+  display: block;
+  font-size: 19px;
+  margin: var(--space-label-top) 0 var(--space-label-bottom);
+  line-height: 1.1;
+}
+
+/* Don’t add extra top margin on the very first label in a form */
+form label:first-of-type {
+  margin-top: 0;
+}
+
+form input {
+  width: 100%;
+  max-width: 100%;
+  height: 52px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--color-border);
+  padding: 0 0.65em;
+  background: #fff;
+  font-size: var(--fs-input);
+  line-height: 1.2;
+  opacity: 0.95;
+  transition: border-color 120ms, box-shadow 120ms;
+}
+
+form input:focus {
+  outline: none;
+  border-color: #333;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+}
+
+/* Actions row (shared) */
+.actions {
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-actions-top);
+}
+
+/* URL form: space-between (two buttons) */
+#url-form .actions {
+  justify-content: space-between;
+}
+
+/* Key form: single submit aligned right */
+#key-form .actions {
+  justify-content: flex-end;
+}
+
+/* Primary submit button */
+button[type="submit"] {
+  padding: 12px 40px;
+  border: none;
+  border-radius: var(--radius-button);
+  background: var(--color-accent);
+  color: #000;
+  letter-spacing: 0.25px;
+  cursor: pointer;
+  transition: background 140ms;
+}
+
+button[type="submit"]:hover,
+button[type="submit"]:focus {
+  background: var(--color-accent-hover);
+  outline: none;
+}
+
+/* Text-style secondary action */
+#resetKeys {
+  color: #1144aa;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+#resetKeys:hover,
+#resetKeys:focus {
+  color: #0d378a;
+  outline: none;
+}
+
+/* Result area */
+#result {
+  margin-top: 14px;
+  font-size: 14px;
+  min-height: 18px;
+}
+
+/* Subtle fade-in when forms are revealed */
+form[style*="display:none"] {
+  opacity: 0;
+}
+
+form:not([style*="display:none"]) {
+  animation: fadeIn 180ms ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
