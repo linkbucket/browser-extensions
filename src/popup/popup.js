@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resultDiv.textContent = "Saving...";
 
       try {
-        const response = await fetch("http://localhost:3000/api/v1/urls", {
+        const response = await fetch("https://linkbucket.app/api/v1/urls", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
