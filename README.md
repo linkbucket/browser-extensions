@@ -115,6 +115,7 @@ Considering open-sourcing under MIT or Apache-2.0. (To proceed: add LICENSE file
 
 ## 14. Changelog
 - 0.1.0: Initial release.
+- 0.2.0: Added tag support.
 
 ---
 

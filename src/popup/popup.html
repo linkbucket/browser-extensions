@@ -3,6 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <title>Linkbucket</title>
+
+    <!-- Tom Select styles (local copy; no remote CDNs in MV3) -->
+    <link rel="stylesheet" href="/vendor/tom-select/tom-select.min.css" />
+
+    <!-- Existing popup styles -->
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
@@ -53,6 +58,17 @@
         autocapitalize="off"
         required
       />
+
+      <!-- New: Tags field -->
+      <label for="tags">Tags</label>
+      <select
+        id="tags"
+        name="tags[]"
+        multiple
+        placeholder="Add tags…"
+        autocomplete="off"
+      ></select>
+
       <div class="actions">
         <button id="resetKeys" type="button">Change API Keys</button>
         <button type="submit">Save link</button>
@@ -60,6 +76,11 @@
     </form>
 
     <div id="result" class="small"></div>
+
+    <!-- Tom Select library (local UMD build) -->
+    <script src="/vendor/tom-select/tom-select.complete.min.js"></script>
+
+    <!-- App logic -->
     <script type="module" src="popup.js"></script>
   </body>
 </html>

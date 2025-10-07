@@ -20,114 +20,280 @@
  * - No console logging of credentials or saved links.
  * - Fonts (Work Sans) are bundled locally; no external font requests.
  * - Network calls are limited to the Linkbucket API endpoint.
- *
- * If you are a reviewer: please feel free to search for "console." or "eval"-
- * they are intentionally absent. We aim for minimal surface area and clarity.
  */
 
-document.addEventListener("DOMContentLoaded", () => {
-  const keyForm = document.getElementById("key-form");
-  const urlForm = document.getElementById("url-form");
-  const urlInput = document.getElementById("url");
-  const resultDiv = document.getElementById("result");
-  const resetKeysBtn = document.getElementById("resetKeys");
+const API_BASE = "https://linkbucket.app/api/v1";
 
-  // Helper function to validate URL
-  const isValidUrl = (urlString) => {
-    try {
-      const url = new URL(urlString);
-      // Optionally, only allow http(s) URLs
-      return url.protocol === "http:" || url.protocol === "https:";
-    } catch (e) {
-      return false;
-    }
+// Storage helpers
+const storage = {
+  get: (keys) => new Promise((resolve) => chrome.storage.local.get(keys, resolve)),
+  set: (obj) => new Promise((resolve) => chrome.storage.local.set(obj, resolve)),
+  remove: (keys) => new Promise((resolve) => chrome.storage.local.remove(keys, resolve)),
+};
+
+// Build authentication headers
+async function buildAuthHeaders() {
+  const { accessKeyId, secretKey } = await storage.get(["accessKeyId", "secretKey"]);
+  return {
+    "X-Access-Key-Id": accessKeyId || "",
+    "X-Secret-Key": secretKey || "",
   };
+}
 
-  // Check for keys and show appropriate form
-  chrome.storage.local.get(["accessKeyId", "secretKey"], (data) => {
-    if (data.accessKeyId && data.secretKey) {
-      keyForm.style.display = "none";
-      urlForm.style.display = "block";
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        if (tabs[0] && tabs[0].url) {
-          urlInput.value = tabs[0].url;
-        }
-      });
+// Generic API fetch wrapper
+async function apiFetch(path, options = {}) {
+  const authHeaders = await buildAuthHeaders();
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders,
+      ...options.headers,
+    },
+  });
+  return response;
+}
+
+// Get active tab URL
+async function getActiveTabUrl() {
+  const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  if (tabs?.[0]?.url) return tabs[0].url;
+  
+  const fallbackTabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  return fallbackTabs?.[0]?.url || "";
+}
+
+// URL validation
+function isValidUrl(urlString) {
+  try {
+    const url = new URL(urlString);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+// DOM element cache
+const $ = {
+  keyForm: null,
+  urlForm: null,
+  urlInput: null,
+  resultDiv: null,
+  resetKeysBtn: null,
+  tagsSelect: null,
+  accessKeyId: null,
+  secretKey: null,
+};
+
+// Tom Select instance
+let tagSelect = null;
+
+// Normalize backend tag response - expects array of {id, title, tag_id?}
+function normalizeTags(json) {
+  // Handle different response structures
+  const list = Array.isArray(json) 
+    ? json 
+    : json?.data || json?.user_tags || json?.tags || [];
+
+  return list
+    .filter((t) => t && typeof t === "object")
+    .map((t) => {
+      // The API should return {id: userTagId, title: tagTitle}
+      const id = t.id ?? t.uuid ?? t.value ?? "";
+      const title = t.title ?? t.name ?? t.label ?? "Untitled";
+      
+      return {
+        id: String(id),
+        title: String(title),
+      };
+    })
+    .filter((t) => t.id && t.title); // Only include valid tags
+}
+
+// Fetch all user tags from API
+async function fetchUserTags() {
+  const response = await apiFetch("/user_tags");
+  if (!response.ok) {
+    throw new Error(`Failed to load tags (${response.status})`);
+  }
+  
+  const json = await response.json();
+  console.log("Raw API response:", json); // Debug log
+  
+  const normalized = normalizeTags(json);
+  console.log("Normalized tags:", normalized); // Debug log
+  
+  return normalized;
+}
+
+// Initialize Tom Select for tags
+async function initTagsSelect() {
+  if (!$.tagsSelect || !window.TomSelect) return;
+
+  // Clean up previous instance
+  tagSelect?.destroy();
+  tagSelect = null;
+
+  // Load existing tags
+  let options = [];
+  try {
+    options = await fetchUserTags();
+  } catch (error) {
+    console.error("Failed to load tags:", error);
+    // Silently fail in UI - user can still create new tags
+  }
+
+  console.log("Tom Select options:", options); // Debug log
+
+  // Initialize Tom Select
+  tagSelect = new window.TomSelect($.tagsSelect, {
+    plugins: ["remove_button"],
+    persist: false,
+    valueField: "id",
+    labelField: "title",
+    searchField: ["title"],
+    placeholder: $.tagsSelect.getAttribute("placeholder") || "Add tags…",
+    maxOptions: 2000,
+    options,
+    create: (input) => ({
+      id: `new:${input}`,
+      title: input,
+    }),
+  });
+}
+
+// Extract selected tags into separate arrays
+function getSelectedTags() {
+  const values = tagSelect?.getValue() ?? 
+    Array.from($.tagsSelect?.selectedOptions || []).map((o) => o.value);
+  
+  const selected = Array.isArray(values) ? values : [values];
+  const user_tag_ids = [];
+  const tag_names = [];
+
+  selected.forEach((value) => {
+    if (!value) return;
+    if (value.startsWith("new:")) {
+      tag_names.push(value.slice(4));
     } else {
-      keyForm.style.display = "block";
-      urlForm.style.display = "none";
+      user_tag_ids.push(value);
     }
   });
 
-  // Handle key form submission
-  keyForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const accessKeyId = document.getElementById("accessKeyId").value;
-    const secretKey = document.getElementById("secretKey").value;
-    if (!accessKeyId || !secretKey) {
-      resultDiv.textContent = "Please enter both keys.";
-      return;
+  return { user_tag_ids, tag_names };
+}
+
+// UI state management
+async function showUrlForm() {
+  $.keyForm.style.display = "none";
+  $.urlForm.style.display = "block";
+
+  const tabUrl = await getActiveTabUrl();
+  if (tabUrl) {
+    $.urlInput.value = tabUrl;
+  }
+
+  await initTagsSelect();
+}
+
+function showKeyForm(message = "") {
+  $.keyForm.style.display = "block";
+  $.urlForm.style.display = "none";
+  $.resultDiv.textContent = message;
+}
+
+function showResult(message) {
+  $.resultDiv.textContent = message;
+}
+
+// Event handlers
+async function handleKeySubmit(e) {
+  e.preventDefault();
+  
+  const accessKeyId = $.accessKeyId.value.trim();
+  const secretKey = $.secretKey.value.trim();
+
+  if (!accessKeyId || !secretKey) {
+    showResult("Please enter both keys.");
+    return;
+  }
+
+  await storage.set({ accessKeyId, secretKey });
+  $.resultDiv.textContent = "";
+  await showUrlForm();
+}
+
+async function handleUrlSubmit(e) {
+  e.preventDefault();
+
+  const url = $.urlInput.value.trim();
+  if (!isValidUrl(url)) {
+    showResult("Please enter a valid URL (http or https).");
+    return;
+  }
+
+  showResult("Saving...");
+
+  try {
+    const { user_tag_ids, tag_names } = getSelectedTags();
+    
+    console.log("Submitting:", { url, user_tag_ids, tag_names }); // Debug log
+    
+    const response = await apiFetch("/urls", {
+      method: "POST",
+      body: JSON.stringify({
+        url: {
+          url,
+          user_tag_ids,
+          tag_names,
+        },
+      }),
+    });
+
+    if (response.ok) {
+      showResult("Success! Link added.");
+    } else {
+      const errorText = await response.text().catch(() => "");
+      showResult(`Error ${response.status}: ${response.statusText}. ${errorText}`);
     }
-    chrome.storage.local.set({ accessKeyId, secretKey }, () => {
-      keyForm.style.display = "none";
-      urlForm.style.display = "block";
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        if (tabs[0] && tabs[0].url) {
-          urlInput.value = tabs[0].url;
-        }
-      });
-      resultDiv.textContent = "";
-    });
-  });
+  } catch (error) {
+    showResult(`Network error: ${error?.message || String(error)}`);
+  }
+}
 
-  // Handle URL form submission with async/await and error/status handling
-  urlForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
+async function handleResetKeys() {
+  await storage.remove(["accessKeyId", "secretKey"]);
+  tagSelect?.destroy();
+  tagSelect = null;
+  
+  $.accessKeyId.value = "";
+  $.secretKey.value = "";
+  
+  showKeyForm("Keys cleared. Please enter new API keys.");
+}
 
-    const url = urlInput.value.trim();
+// Initialize app
+document.addEventListener("DOMContentLoaded", async () => {
+  // Cache DOM elements
+  $.keyForm = document.getElementById("key-form");
+  $.urlForm = document.getElementById("url-form");
+  $.urlInput = document.getElementById("url");
+  $.resultDiv = document.getElementById("result");
+  $.resetKeysBtn = document.getElementById("resetKeys");
+  $.tagsSelect = document.getElementById("tags");
+  $.accessKeyId = document.getElementById("accessKeyId");
+  $.secretKey = document.getElementById("secretKey");
 
-    if (!isValidUrl(url)) {
-      resultDiv.textContent = "Please enter a valid URL (http or https).";
-      return;
-    }
+  // Determine initial view
+  const { accessKeyId, secretKey } = await storage.get(["accessKeyId", "secretKey"]);
+  if (accessKeyId && secretKey) {
+    await showUrlForm();
+  } else {
+    showKeyForm();
+  }
 
-    chrome.storage.local.get(["accessKeyId", "secretKey"], async (data) => {
-      const accessKeyId = data.accessKeyId;
-      const secretKey = data.secretKey;
-
-      resultDiv.textContent = "Saving...";
-
-      try {
-        const response = await fetch("https://linkbucket.app/api/v1/urls", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Access-Key-Id": accessKeyId,
-            "X-Secret-Key": secretKey
-          },
-          body: JSON.stringify({ url: { url, user_tag_ids: [] } })
-        });
-
-        if (response.ok) {
-          resultDiv.textContent = "Success! Link added.";
-        } else {
-          const errorText = await response.text();
-          resultDiv.textContent = `Error ${response.status}: ${response.statusText}. ${errorText}`;
-        }
-      } catch (err) {
-        resultDiv.textContent = `Network error: ${err.message}`;
-      }
-    });
-  });
-
-  // Handle reset keys
-  resetKeysBtn.addEventListener("click", () => {
-    chrome.storage.local.remove(["accessKeyId", "secretKey"], () => {
-      keyForm.style.display = "block";
-      urlForm.style.display = "none";
-      resultDiv.textContent = "Keys cleared. Please enter new API keys.";
-      document.getElementById("accessKeyId").value = "";
-      document.getElementById("secretKey").value = "";
-    });
-  });
+  // Attach event listeners
+  $.keyForm.addEventListener("submit", handleKeySubmit);
+  $.urlForm.addEventListener("submit", handleUrlSubmit);
+  $.resetKeysBtn.addEventListener("click", handleResetKeys);
 });
