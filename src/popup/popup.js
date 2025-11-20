@@ -110,23 +110,7 @@ function normalizeTags(json) {
     .filter((t) => t.id && t.title); // Only include valid tags
 }
 
-// Fetch all user tags from API
-async function fetchUserTags() {
-  const response = await apiFetch("/user_tags");
-  if (!response.ok) {
-    throw new Error(`Failed to load tags (${response.status})`);
-  }
-  
-  const json = await response.json();
-  console.log("Raw API response:", json); // Debug log
-  
-  const normalized = normalizeTags(json);
-  console.log("Normalized tags:", normalized); // Debug log
-  
-  return normalized;
-}
-
-// Initialize Tom Select for tags
+// Initialize Tom Select for tags (remote search)
 async function initTagsSelect() {
   if (!$.tagsSelect || !window.TomSelect) return;
 
@@ -134,18 +118,7 @@ async function initTagsSelect() {
   tagSelect?.destroy();
   tagSelect = null;
 
-  // Load existing tags
-  let options = [];
-  try {
-    options = await fetchUserTags();
-  } catch (error) {
-    console.error("Failed to load tags:", error);
-    // Silently fail in UI - user can still create new tags
-  }
-
-  console.log("Tom Select options:", options); // Debug log
-
-  // Initialize Tom Select
+  // Initialize Tom Select with remote loading
   tagSelect = new window.TomSelect($.tagsSelect, {
     plugins: ["remove_button"],
     persist: false,
@@ -154,7 +127,26 @@ async function initTagsSelect() {
     searchField: ["title"],
     placeholder: $.tagsSelect.getAttribute("placeholder") || "Add tags…",
     maxOptions: 2000,
-    options,
+    preload: false,
+    load: async (query, callback) => {
+      try {
+        const q = encodeURIComponent(query || "");
+        const response = await apiFetch(`/user_tags?query=${q}`);
+        if (!response.ok) {
+          console.error("Failed to load tags:", response.status, response.statusText);
+          callback();
+          return;
+        }
+
+        const json = await response.json();
+        console.log("tags search response", { query, json }); // temporary debug
+        const options = normalizeTags(json);
+        callback(options);
+      } catch (error) {
+        console.error("Failed to load tags:", error);
+        callback(); // fail silently so user can still create new tags
+      }
+    },
     create: (input) => ({
       id: `new:${input}`,
       title: input,
@@ -236,8 +228,6 @@ async function handleUrlSubmit(e) {
 
   try {
     const { user_tag_ids, tag_names } = getSelectedTags();
-    
-    console.log("Submitting:", { url, user_tag_ids, tag_names }); // Debug log
     
     const response = await apiFetch("/urls", {
       method: "POST",
