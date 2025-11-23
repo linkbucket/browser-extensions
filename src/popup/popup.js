@@ -26,14 +26,20 @@ const API_BASE = "https://linkbucket.app/api/v1";
 
 // Storage helpers
 const storage = {
-  get: (keys) => new Promise((resolve) => chrome.storage.local.get(keys, resolve)),
-  set: (obj) => new Promise((resolve) => chrome.storage.local.set(obj, resolve)),
-  remove: (keys) => new Promise((resolve) => chrome.storage.local.remove(keys, resolve)),
+  get: (keys) =>
+    new Promise((resolve) => chrome.storage.local.get(keys, resolve)),
+  set: (obj) =>
+    new Promise((resolve) => chrome.storage.local.set(obj, resolve)),
+  remove: (keys) =>
+    new Promise((resolve) => chrome.storage.local.remove(keys, resolve)),
 };
 
 // Build authentication headers
 async function buildAuthHeaders() {
-  const { accessKeyId, secretKey } = await storage.get(["accessKeyId", "secretKey"]);
+  const { accessKeyId, secretKey } = await storage.get([
+    "accessKeyId",
+    "secretKey",
+  ]);
   return {
     "X-Access-Key-Id": accessKeyId || "",
     "X-Secret-Key": secretKey || "",
@@ -56,10 +62,16 @@ async function apiFetch(path, options = {}) {
 
 // Get active tab URL
 async function getActiveTabUrl() {
-  const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+  const tabs = await chrome.tabs.query({
+    active: true,
+    lastFocusedWindow: true,
+  });
   if (tabs?.[0]?.url) return tabs[0].url;
-  
-  const fallbackTabs = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  const fallbackTabs = await chrome.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
   return fallbackTabs?.[0]?.url || "";
 }
 
@@ -83,16 +95,20 @@ const $ = {
   tagsSelect: null,
   accessKeyId: null,
   secretKey: null,
+  submitButton: null,
 };
 
 // Tom Select instance
 let tagSelect = null;
 
+// Track current URL record (if already saved for this user)
+let existingUrlRecord = null;
+
 // Normalize backend tag response - expects array of {id, title, tag_id?}
 function normalizeTags(json) {
   // Handle different response structures
-  const list = Array.isArray(json) 
-    ? json 
+  const list = Array.isArray(json)
+    ? json
     : json?.data || json?.user_tags || json?.tags || [];
 
   return list
@@ -101,7 +117,7 @@ function normalizeTags(json) {
       // The API should return {id: userTagId, title: tagTitle}
       const id = t.id ?? t.uuid ?? t.value ?? "";
       const title = t.title ?? t.name ?? t.label ?? "Untitled";
-      
+
       return {
         id: String(id),
         title: String(title),
@@ -133,7 +149,11 @@ async function initTagsSelect() {
         const q = encodeURIComponent(query || "");
         const response = await apiFetch(`/user_tags?query=${q}`);
         if (!response.ok) {
-          console.error("Failed to load tags:", response.status, response.statusText);
+          console.error(
+            "Failed to load tags:",
+            response.status,
+            response.statusText,
+          );
           callback();
           return;
         }
@@ -156,9 +176,10 @@ async function initTagsSelect() {
 
 // Extract selected tags into separate arrays
 function getSelectedTags() {
-  const values = tagSelect?.getValue() ?? 
+  const values =
+    tagSelect?.getValue() ??
     Array.from($.tagsSelect?.selectedOptions || []).map((o) => o.value);
-  
+
   const selected = Array.isArray(values) ? values : [values];
   const user_tag_ids = [];
   const tag_names = [];
@@ -175,6 +196,32 @@ function getSelectedTags() {
   return { user_tag_ids, tag_names };
 }
 
+// Look up whether the given URL is already saved for the current user
+async function lookupUrl(url) {
+  try {
+    const q = encodeURIComponent(url);
+    const response = await apiFetch(`/user_bookmarks/lookup?url=${q}`, {
+      method: "GET",
+    });
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      console.error("Lookup failed", response.status, response.statusText);
+      return null;
+    }
+
+    const json = await response.json();
+    // Expected shape from backend: { id, url, tags: [{id, title}, ...] }
+    return json;
+  } catch (error) {
+    console.error("Lookup error", error);
+    return null;
+  }
+}
+
 // UI state management
 async function showUrlForm() {
   $.keyForm.style.display = "none";
@@ -186,6 +233,38 @@ async function showUrlForm() {
   }
 
   await initTagsSelect();
+
+  // Reset previous lookup state
+  existingUrlRecord = null;
+
+  // If we have a sensible URL, try to see if it already exists
+  if (tabUrl && isValidUrl(tabUrl)) {
+    const record = await lookupUrl(tabUrl);
+    if (record && record.id) {
+      existingUrlRecord = record;
+
+      // Pre-select existing tags, if any
+      if (Array.isArray(record.tags) && tagSelect) {
+        const tagIds = record.tags.map((t) => String(t.id));
+
+        // Make sure options exist in Tom Select before setting value
+        record.tags.forEach((t) => {
+          const id = String(t.id);
+          if (!tagSelect.options[id]) {
+            tagSelect.addOption({ id, title: t.title });
+          }
+        });
+
+        tagSelect.setValue(tagIds, true);
+      }
+
+      showResult("");
+    } else {
+      showResult(""); // clear any old message
+    }
+  } else {
+    showResult(""); // clear if URL is invalid or missing
+  }
 }
 
 function showKeyForm(message = "") {
@@ -201,7 +280,7 @@ function showResult(message) {
 // Event handlers
 async function handleKeySubmit(e) {
   e.preventDefault();
-  
+
   const accessKeyId = $.accessKeyId.value.trim();
   const secretKey = $.secretKey.value.trim();
 
@@ -228,23 +307,45 @@ async function handleUrlSubmit(e) {
 
   try {
     const { user_tag_ids, tag_names } = getSelectedTags();
-    
-    const response = await apiFetch("/urls", {
-      method: "POST",
-      body: JSON.stringify({
-        url: {
-          url,
-          user_tag_ids,
-          tag_names,
-        },
-      }),
-    });
+
+    let response;
+
+    if (existingUrlRecord && existingUrlRecord.id) {
+      // Update existing link
+      response = await apiFetch(`/user_bookmarks/${existingUrlRecord.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          url: {
+            user_tag_ids,
+            tag_names,
+          },
+        }),
+      });
+    } else {
+      // Create new link
+      response = await apiFetch("/urls", {
+        method: "POST",
+        body: JSON.stringify({
+          url: {
+            url,
+            user_tag_ids,
+            tag_names,
+          },
+        }),
+      });
+    }
 
     if (response.ok) {
-      showResult("Success! Link added.");
+      if (existingUrlRecord && existingUrlRecord.id) {
+        showResult("Success! Link updated.");
+      } else {
+        showResult("Success! Link added.");
+      }
     } else {
       const errorText = await response.text().catch(() => "");
-      showResult(`Error ${response.status}: ${response.statusText}. ${errorText}`);
+      showResult(
+        `Error ${response.status}: ${response.statusText}. ${errorText}`,
+      );
     }
   } catch (error) {
     showResult(`Network error: ${error?.message || String(error)}`);
@@ -253,12 +354,14 @@ async function handleUrlSubmit(e) {
 
 async function handleResetKeys() {
   await storage.remove(["accessKeyId", "secretKey"]);
+  existingUrlRecord = null;
   tagSelect?.destroy();
   tagSelect = null;
-  
+
   $.accessKeyId.value = "";
   $.secretKey.value = "";
-  
+  $.urlInput.value = "";
+
   showKeyForm("Keys cleared. Please enter new API keys.");
 }
 
@@ -273,9 +376,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   $.tagsSelect = document.getElementById("tags");
   $.accessKeyId = document.getElementById("accessKeyId");
   $.secretKey = document.getElementById("secretKey");
+  $.submitButton = $.urlForm.querySelector('button[type="submit"]');
 
   // Determine initial view
-  const { accessKeyId, secretKey } = await storage.get(["accessKeyId", "secretKey"]);
+  const { accessKeyId, secretKey } = await storage.get([
+    "accessKeyId",
+    "secretKey",
+  ]);
   if (accessKeyId && secretKey) {
     await showUrlForm();
   } else {
