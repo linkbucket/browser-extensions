@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Linkbucket",
   "short_name": "Linkbucket",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Add links to your Linkbucket account quickly from the browser.",
   "icons": {
     "16": "assets/icons/icon-16.png",
@@ -18,13 +18,8 @@
     },
     "default_popup": "src/popup/popup.html"
   },
-  "permissions": [
-    "storage",
-    "activeTab"
-  ],
-  "host_permissions": [
-    "https://linkbucket.app/api/*"
-  ],
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["https://linkbucket.app/api/*"],
   "homepage_url": "https://linkbucket.app",
   "author": "Linkbucket Team"
 }
