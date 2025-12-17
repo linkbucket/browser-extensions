@@ -183,7 +183,6 @@ async function initTagsSelect() {
         }
 
         const json = await response.json();
-        console.log("tags search response", { query, json }); // temporary debug
         const options = normalizeTags(json);
         callback(options);
       } catch (error) {
