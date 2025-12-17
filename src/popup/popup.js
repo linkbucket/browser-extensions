@@ -135,15 +135,39 @@ async function initTagsSelect() {
   tagSelect = null;
 
   // Initialize Tom Select with remote loading
-  tagSelect = new window.TomSelect($.tagsSelect, {
-    plugins: ["remove_button"],
+  tagSelect = new window.TomSelect($. tagsSelect, {
+    plugins: {
+      remove_button: {
+        title: "Remove this item",
+      },
+    },
     persist: false,
     valueField: "id",
     labelField: "title",
     searchField: ["title"],
-    placeholder: $.tagsSelect.getAttribute("placeholder") || "Add tags…",
+    placeholder: $.tagsSelect.getAttribute("placeholder") || "Add tags...",
     maxOptions: 2000,
     preload: false,
+
+    // Clear textbox and refresh options after adding an item
+    onItemAdd: function () {
+      this.setTextboxValue("");
+      this.refreshOptions();
+    },
+
+    // Validate tag format - lowercase alphanumeric with hyphens
+    // No leading/trailing hyphens, no consecutive hyphens
+    createFilter: "^(?!-)(?!.*-$)(?!.*--)[0-9a-z-]+$",
+
+    // Allow selecting options with Tab key
+    selectOnTab: true,
+
+    // Hide placeholder when items are selected
+    hidePlaceholder: true,
+
+    // Don't prioritize adding new items over existing matches
+    addPrecedence: false,
+
     load: async (query, callback) => {
       try {
         const q = encodeURIComponent(query || "");
