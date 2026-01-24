@@ -135,7 +135,7 @@ async function initTagsSelect() {
   tagSelect = null;
 
   // Initialize Tom Select with remote loading
-  tagSelect = new window.TomSelect($. tagsSelect, {
+  tagSelect = new window.TomSelect($.tagsSelect, {
     plugins: {
       remove_button: {
         title: "Remove this item",
