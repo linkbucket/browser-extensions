@@ -148,6 +148,7 @@ async function initTagsSelect() {
     placeholder: $.tagsSelect.getAttribute("placeholder") || "Add tags...",
     maxOptions: 2000,
     preload: false,
+    loadThrottle: 300,
 
     // Clear textbox and refresh options after adding an item
     onItemAdd: function () {
