@@ -164,3 +164,38 @@ form:not([style*="display:none"]) {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* Tom Select overrides to match input styling */
+.ts-wrapper.multi .ts-control {
+  padding: 0 0.65em;
+  min-height: 50px;
+  border-radius: var(--radius-input);
+  border: 1px solid var(--color-border);
+  background: #fff;
+  opacity: 0.95;
+  transition: border-color 120ms, box-shadow 120ms;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ts-wrapper.multi .ts-control > input {
+  padding: 0;
+  margin: 0;
+  line-height: 50px;
+}
+
+.ts-wrapper.multi .ts-control > .item {
+  margin: 6px 4px 6px 0;
+}
+
+.ts-wrapper.multi.focus .ts-control {
+  border-color: #333;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+}
+
+/* Tom Select dropdown */
+.ts-dropdown {
+  max-height: 200px;
+  overflow-y: auto;
+}
