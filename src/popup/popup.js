@@ -146,7 +146,7 @@ async function initTagsSelect() {
     labelField: "title",
     searchField: ["title"],
     placeholder: $.tagsSelect.getAttribute("placeholder") || "Add tags...",
-    maxOptions: 2000,
+    maxOptions: 50,
     preload: false,
     loadThrottle: 300,
 
