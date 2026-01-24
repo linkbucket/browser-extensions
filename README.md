@@ -119,6 +119,7 @@ Considering open-sourcing under MIT or Apache-2.0. (To proceed: add LICENSE file
 - 0.2.1: Switch tag loading to remote search-based fetching for improved performance.
 - 0.2.2: Support adding existing bookmarks.
 - 0.2.3: Align tag input behavior with main Linkbucket app.
+- 0.2.4: Improve tag input styling and typing performance.
 
 ---
 

@@ -135,7 +135,7 @@ async function initTagsSelect() {
   tagSelect = null;
 
   // Initialize Tom Select with remote loading
-  tagSelect = new window.TomSelect($. tagsSelect, {
+  tagSelect = new window.TomSelect($.tagsSelect, {
     plugins: {
       remove_button: {
         title: "Remove this item",
@@ -146,8 +146,10 @@ async function initTagsSelect() {
     labelField: "title",
     searchField: ["title"],
     placeholder: $.tagsSelect.getAttribute("placeholder") || "Add tags...",
-    maxOptions: 2000,
+    maxOptions: 50,
     preload: false,
+    loadThrottle: 300,
+    dropdownParent: "body",
 
     // Clear textbox and refresh options after adding an item
     onItemAdd: function () {

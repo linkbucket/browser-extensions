@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Linkbucket",
   "short_name": "Linkbucket",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Add links to your Linkbucket account quickly from the browser.",
   "icons": {
     "16": "assets/icons/icon-16.png",
