@@ -79,7 +79,7 @@ async function getActiveTabUrl() {
 function isValidUrl(urlString) {
   try {
     const url = new URL(urlString);
-    return url.protocol === "http:" || url.protocol === "https:";
+    return url.protocol === "https:";
   } catch {
     return false;
   }
@@ -324,7 +324,7 @@ async function handleUrlSubmit(e) {
 
   const url = $.urlInput.value.trim();
   if (!isValidUrl(url)) {
-    showResult("Please enter a valid URL (http or https).");
+    showResult("This page cannot be saved (HTTPS required).");
     return;
   }
 
