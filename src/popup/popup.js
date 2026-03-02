@@ -1,6 +1,6 @@
 /**
  * Reviewer / Maintainer Note:
- * We use chrome.storage.local to persist the user's Linkbucket API key + secret so
+ * We use browser.storage.local to persist the user's Linkbucket API key + secret so
  * they only have to enter them once. No other data (like browsing history) is stored.
  *
  * Why not sync storage? Keys are considered sensitive; keeping them local avoids
@@ -26,12 +26,9 @@ const API_BASE = "https://linkbucket.app/api/v1";
 
 // Storage helpers
 const storage = {
-  get: (keys) =>
-    new Promise((resolve) => chrome.storage.local.get(keys, resolve)),
-  set: (obj) =>
-    new Promise((resolve) => chrome.storage.local.set(obj, resolve)),
-  remove: (keys) =>
-    new Promise((resolve) => chrome.storage.local.remove(keys, resolve)),
+  get: (keys) => browser.storage.local.get(keys),
+  set: (obj) => browser.storage.local.set(obj),
+  remove: (keys) => browser.storage.local.remove(keys),
 };
 
 // Build authentication headers
@@ -62,13 +59,13 @@ async function apiFetch(path, options = {}) {
 
 // Get active tab URL
 async function getActiveTabUrl() {
-  const tabs = await chrome.tabs.query({
+  const tabs = await browser.tabs.query({
     active: true,
     lastFocusedWindow: true,
   });
   if (tabs?.[0]?.url) return tabs[0].url;
 
-  const fallbackTabs = await chrome.tabs.query({
+  const fallbackTabs = await browser.tabs.query({
     active: true,
     currentWindow: true,
   });
@@ -411,8 +408,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (accessKeyId && secretKey) {
     await showUrlForm();
   } else {
+    // Restore any partially-entered key so the user can continue
+    // after the popup closes mid-setup (e.g., switching apps to copy
+    // the second key).
+    if (accessKeyId) $.accessKeyId.value = accessKeyId;
+    if (secretKey) $.secretKey.value = secretKey;
     showKeyForm();
   }
+
+  // Persist each key field on input so progress survives popup close
+  $.accessKeyId.addEventListener("input", () => {
+    storage.set({ accessKeyId: $.accessKeyId.value.trim() });
+  });
+  $.secretKey.addEventListener("input", () => {
+    storage.set({ secretKey: $.secretKey.value.trim() });
+  });
 
   // Attach event listeners
   $.keyForm.addEventListener("submit", handleKeySubmit);
