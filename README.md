@@ -139,14 +139,14 @@ Considering open-sourcing under MIT or Apache-2.0. (To proceed: add LICENSE file
 - Email: hello@linkbucket.app
 
 ## 15. Changelog
-- 0.1.0: Initial release.
-- 0.2.0: Added tag support.
-- 0.2.1: Switch tag loading to remote search-based fetching for improved performance.
-- 0.2.2: Support adding existing bookmarks.
-- 0.2.3: Align tag input behavior with main Linkbucket app.
-- 0.2.4: Improve tag input styling and typing performance.
-- 0.2.5: Enforce HTTPS-only URLs and disable URL field editing for better security.
 - 0.3.0: Add Firefox support. Cross-browser build system. Auto-persist key fields during setup.
+- 0.2.5: Enforce HTTPS-only URLs and disable URL field editing for better security.
+- 0.2.4: Improve tag input styling and typing performance.
+- 0.2.3: Align tag input behavior with main Linkbucket app.
+- 0.2.2: Support adding existing bookmarks.
+- 0.2.1: Switch tag loading to remote search-based fetching for improved performance.
+- 0.2.0: Added tag support.
+- 0.1.0: Initial release.
 
 ---
 
