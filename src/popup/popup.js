@@ -1,3 +1,5 @@
+import { isValidUrl, normalizeTags, splitSelectedTags } from "./utils.js";
+
 const API_BASE = "https://linkbucket.app/api/v1";
 
 // Storage helpers
@@ -48,16 +50,6 @@ async function getActiveTabUrl() {
   return fallbackTabs?.[0]?.url || "";
 }
 
-// URL validation
-function isValidUrl(urlString) {
-  try {
-    const url = new URL(urlString);
-    return url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
 // DOM element cache
 const $ = {
   keyForm: null,
@@ -76,28 +68,6 @@ let tagSelect = null;
 
 // Track current URL record (if already saved for this user)
 let existingUrlRecord = null;
-
-// Normalize backend tag response - expects array of {id, title, tag_id?}
-function normalizeTags(json) {
-  // Handle different response structures
-  const list = Array.isArray(json)
-    ? json
-    : json?.data || json?.user_tags || json?.tags || [];
-
-  return list
-    .filter((t) => t && typeof t === "object")
-    .map((t) => {
-      // The API should return {id: userTagId, title: tagTitle}
-      const id = t.id ?? t.uuid ?? t.value ?? "";
-      const title = t.title ?? t.name ?? t.label ?? "Untitled";
-
-      return {
-        id: String(id),
-        title: String(title),
-      };
-    })
-    .filter((t) => t.id && t.title); // Only include valid tags
-}
 
 // Initialize Tom Select for tags (remote search)
 async function initTagsSelect() {
@@ -178,20 +148,7 @@ function getSelectedTags() {
     tagSelect?.getValue() ??
     Array.from($.tagsSelect?.selectedOptions || []).map((o) => o.value);
 
-  const selected = Array.isArray(values) ? values : [values];
-  const user_tag_ids = [];
-  const tag_names = [];
-
-  selected.forEach((value) => {
-    if (!value) return;
-    if (value.startsWith("new:")) {
-      tag_names.push(value.slice(4));
-    } else {
-      user_tag_ids.push(value);
-    }
-  });
-
-  return { user_tag_ids, tag_names };
+  return splitSelectedTags(values);
 }
 
 // Look up whether the given URL is already saved for the current user

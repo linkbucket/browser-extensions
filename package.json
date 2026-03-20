@@ -17,7 +17,8 @@
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write \"src/**/*.{js,css,html}\"",
-    "format:check": "prettier --check \"src/**/*.{js,css,html}\""
+    "format:check": "prettier --check \"src/**/*.{js,css,html}\"",
+    "test": "vitest run"
   },
   "dependencies": {
     "tom-select": "^2.4.3",
@@ -27,6 +28,7 @@
     "@eslint/js": "^9.24.0",
     "eslint": "^9.24.0",
     "globals": "^16.0.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "vitest": "^4.1.0"
   }
 }
