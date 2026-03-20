@@ -125,8 +125,7 @@ The build script copies all shared source files and selects the correct browser-
 **A:** Not simultaneously; you can swap credentials using "Change API keys".
 
 ## 12. License
-Currently: Proprietary (All rights reserved).
-Considering open-sourcing under MIT or Apache-2.0. (To proceed: add LICENSE file + adjust notices.)
+MIT License. See [LICENSE](LICENSE).
 
 ## 13. Third-Party Assets / Notices
 - Work Sans font (SIL Open Font License 1.1). See `assets/fonts/NOTICE` and `assets/fonts/OFL-1.1.txt`.
