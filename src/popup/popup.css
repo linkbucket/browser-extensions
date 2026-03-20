@@ -1,13 +1,17 @@
 @font-face {
-  font-family: 'Work Sans';
+  font-family: "Work Sans";
   font-weight: normal;
-  src: local('Work Sans'), url('/assets/fonts/WorkSans-Regular.woff2') format('woff2');
+  src:
+    local("Work Sans"),
+    url("/assets/fonts/WorkSans-Regular.woff2") format("woff2");
 }
 
 @font-face {
-  font-family: 'Work Sans';
+  font-family: "Work Sans";
   font-weight: bold;
-  src: local('Work Sans'), url('/assets/fonts/WorkSans-Bold.woff2') format('woff2');
+  src:
+    local("Work Sans"),
+    url("/assets/fonts/WorkSans-Bold.woff2") format("woff2");
 }
 
 :root {
@@ -15,8 +19,8 @@
   --fs-input: 16px;
   --color-bg: hsla(43, 30%, 95%, 1);
   --color-border: #000;
-  --color-accent: #FFAA8E;
-  --color-accent-hover: #FF9877;
+  --color-accent: #ffaa8e;
+  --color-accent-hover: #ff9877;
   --radius-input: 8px;
   --radius-button: 25px;
   --space-form-gap: 10px;
@@ -26,15 +30,24 @@
 }
 
 /* Reset / base */
-*, *::before, *::after { box-sizing: border-box; }
-input, button, select, textarea { font: inherit; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+input,
+button,
+select,
+textarea {
+  font: inherit;
+}
 
 body {
   width: 470px;
   padding: 0 1.5rem 1.25rem;
   margin: 0;
   background: var(--color-bg);
-  font-family: 'Work Sans', sans-serif;
+  font-family: "Work Sans", sans-serif;
   font-size: var(--fs-base);
 }
 
@@ -82,7 +95,9 @@ form input {
   font-size: var(--fs-input);
   line-height: 1.2;
   opacity: 0.95;
-  transition: border-color 120ms, box-shadow 120ms;
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
 }
 
 form input[readonly] {
@@ -94,7 +109,7 @@ form input[readonly] {
 form input:focus {
   outline: none;
   border-color: #333;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 
 /* Actions row (shared) */
@@ -167,8 +182,14 @@ form:not([style*="display:none"]) {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Tom Select overrides to match input styling */
@@ -179,7 +200,9 @@ form:not([style*="display:none"]) {
   border: 1px solid var(--color-border);
   background: #fff;
   opacity: 0.95;
-  transition: border-color 120ms, box-shadow 120ms;
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -197,7 +220,7 @@ form:not([style*="display:none"]) {
 
 .ts-wrapper.multi.focus .ts-control {
   border-color: #333;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 
 /* Tom Select dropdown */
