@@ -25,8 +25,9 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "linkbucket@linkbucket.app",
-      "strict_min_version": "109.0",
+      "strict_min_version": "142.0",
       "data_collection_permissions": {
+        "required": ["browsingActivity", "authenticationInfo"],
         "urlbar_data_collection": false,
         "private_browsing_data_collection": false
       }
