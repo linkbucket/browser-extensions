@@ -44,7 +44,8 @@ npm run build
 1. Make your changes in `src/`
 2. Run `npm run build` (or `npm run build:chrome` / `npm run build:firefox`)
 3. Reload the extension in your browser to see changes
-4. Run `npm run lint` and `npm run format:check` before committing
+4. Run `npm test` to make sure existing tests pass
+5. Run `npm run lint` and `npm run format:check` before committing
 
 ## Code Style
 
@@ -62,13 +63,20 @@ Please ensure your changes pass both checks before opening a pull request.
 ## Project Structure
 
 ```
-├── src/popup/          # Extension popup UI (HTML, CSS, JS)
-├── assets/             # Icons, images, fonts
-├── manifests
-│   ├── manifest.chrome.json
-│   └── manifest.firefox.json
-├── scripts/build.sh    # Build script
-└── dist/               # Build output (not committed)
+├── src/popup/
+│   ├── popup.html          # Extension popup markup
+│   ├── popup.css           # Styles
+│   ├── popup.js            # Entry point — DOM, UI state, event handlers
+│   ├── api.js              # API fetch wrapper and URL lookup
+│   ├── storage.js          # browser.storage.local wrapper
+│   ├── tags.js             # Tom Select lifecycle (init, get, set, destroy)
+│   └── utils.js            # Pure helpers (URL validation, tag normalization)
+├── tests/                  # Unit tests
+├── assets/                 # Icons, images, fonts
+├── manifest.chrome.json    # Chrome manifest (MV3)
+├── manifest.firefox.json   # Firefox manifest (MV3)
+├── scripts/build.sh        # Build script
+└── dist/                   # Build output (not committed)
 ```
 
 Vendor libraries (`tom-select`, `webextension-polyfill`) are installed via npm and copied into the build output by the build script. Do not add files to a `vendor/` directory manually.
@@ -77,7 +85,7 @@ Vendor libraries (`tom-select`, `webextension-polyfill`) are installed via npm a
 
 1. Fork the repository and create a branch from `main`
 2. Make your changes
-3. Ensure `npm run lint` and `npm run format:check` pass
+3. Ensure `npm test`, `npm run lint`, and `npm run format:check` all pass
 4. Open a pull request with a clear description of what you changed and why
 
 ## Reporting Bugs

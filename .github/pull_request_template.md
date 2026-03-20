@@ -8,6 +8,7 @@
 
 ## Checklist
 
+- [ ] `npm test` passes
 - [ ] `npm run lint` passes
 - [ ] `npm run format:check` passes
 - [ ] `npm run build` succeeds for both Chrome and Firefox

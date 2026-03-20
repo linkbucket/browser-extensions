@@ -53,7 +53,15 @@ npm run build
 ## Project Structure
 
 ```
-├── src/popup/              # Extension popup (HTML, CSS, JS)
+├── src/popup/
+│   ├── popup.html          # Extension popup markup
+│   ├── popup.css           # Styles
+│   ├── popup.js            # Entry point — DOM, UI state, event handlers
+│   ├── api.js              # API fetch wrapper and URL lookup
+│   ├── storage.js          # browser.storage.local wrapper
+│   ├── tags.js             # Tom Select lifecycle (init, get, set, destroy)
+│   └── utils.js            # Pure helpers (URL validation, tag normalization)
+├── tests/                  # Unit tests
 ├── assets/                 # Icons, images, bundled fonts
 ├── manifest.chrome.json    # Chrome manifest (MV3)
 ├── manifest.firefox.json   # Firefox manifest (MV3)
@@ -74,6 +82,8 @@ Vendor libraries (`tom-select`, `webextension-polyfill`) are installed via npm a
 | `npm run lint:fix` | Run ESLint with auto-fix |
 | `npm run format` | Format source files with Prettier |
 | `npm run format:check` | Check formatting without modifying files |
+| `npm test` | Run unit tests |
+| `npm run lint:ext` | Build and validate Firefox extension with addons-linter |
 
 ## Contributing
 
@@ -123,5 +133,5 @@ MIT — see [LICENSE](LICENSE).
 ## Third-Party Notices
 
 - **Work Sans** font — SIL Open Font License 1.1. See `assets/fonts/NOTICE` and `assets/fonts/OFL-1.1.txt`.
-- **[webextension-polyfill](https://github.com/nicknisi/webextension-polyfill)** — MPL-2.0. Provides the cross-browser `browser.*` API on Chrome.
+- **[webextension-polyfill](https://github.com/mozilla/webextension-polyfill)** — MPL-2.0. Provides the cross-browser `browser.*` API on Chrome.
 - **[Tom Select](https://tom-select.js.org/)** — Apache-2.0. Tag input widget.
