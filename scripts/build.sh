@@ -12,13 +12,36 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
+NODE_MODULES="$ROOT_DIR/node_modules"
 
-# Shared source files to include in every build
-SHARED_FILES=(
-  assets
-  src
-  vendor
-)
+# Verify dependencies are installed
+if [[ ! -d "$NODE_MODULES" ]]; then
+  echo "Error: node_modules not found. Run 'npm install' first." >&2
+  exit 1
+fi
+
+# Verify manifest versions match package.json version
+PKG_VERSION=$(node -p "require('$ROOT_DIR/package.json').version")
+for manifest in "$ROOT_DIR"/manifest.*.json; do
+  MANIFEST_VERSION=$(node -p "require('$manifest').version")
+  if [[ "$PKG_VERSION" != "$MANIFEST_VERSION" ]]; then
+    echo "Error: version mismatch — package.json ($PKG_VERSION) != $(basename "$manifest") ($MANIFEST_VERSION)" >&2
+    exit 1
+  fi
+done
+
+copy_vendor_files() {
+  local target_dir="$1"
+
+  # tom-select
+  mkdir -p "$target_dir/vendor/tom-select"
+  cp "$NODE_MODULES/tom-select/dist/js/tom-select.complete.min.js" "$target_dir/vendor/tom-select/"
+  cp "$NODE_MODULES/tom-select/dist/css/tom-select.min.css" "$target_dir/vendor/tom-select/"
+
+  # webextension-polyfill
+  mkdir -p "$target_dir/vendor/webextension-polyfill"
+  cp "$NODE_MODULES/webextension-polyfill/dist/browser-polyfill.min.js" "$target_dir/vendor/webextension-polyfill/"
+}
 
 build_target() {
   local target="$1"
@@ -37,10 +60,12 @@ build_target() {
   rm -rf "$target_dir"
   mkdir -p "$target_dir"
 
-  # Copy shared files
-  for item in "${SHARED_FILES[@]}"; do
-    cp -r "$ROOT_DIR/$item" "$target_dir/"
-  done
+  # Copy source files
+  cp -r "$ROOT_DIR/assets" "$target_dir/"
+  cp -r "$ROOT_DIR/src" "$target_dir/"
+
+  # Copy vendor files from node_modules
+  copy_vendor_files "$target_dir"
 
   # Copy the browser-specific manifest
   cp "$manifest_src" "$target_dir/manifest.json"

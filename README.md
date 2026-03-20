@@ -1,152 +1,137 @@
 # Linkbucket Browser Extension
 
-Save the current page directly into your Linkbucket account with a single click. Designed for fast research capture, bookmarking, and link organization without friction or tracking.
+Save the current page directly into your [Linkbucket](https://linkbucket.app) account with a single click. Designed for fast research capture, bookmarking, and link organization without friction or tracking.
 
 Supports **Google Chrome** (and Chromium-based browsers) and **Mozilla Firefox**.
 
-## Table of Contents
-1. Overview
-2. Features
-3. How It Works
-4. Installation (Development)
-5. Building / Packaging
-6. Permissions Rationale
-7. Data & Privacy
-8. Security Measures
-9. Managing API Keys
-10. Troubleshooting
-11. FAQ
-12. License
-13. Third-Party Assets / Notices
-14. Support & Contact
-15. Changelog
+## Features
 
----
+- One-click capture of the active tab's URL
+- Tag support — search existing tags or create new ones inline
+- Local, secure storage of your API credentials (never sent to third parties)
+- "Change API keys" flow to rotate or remove credentials
+- Zero analytics or tracking scripts
+- Bundled fonts — no external CDN requests
 
-## 1. Overview
-The Linkbucket Browser Extension streamlines adding links to your Linkbucket account. It captures the current tab's URL when you click the extension icon and saves it to your account.
+## Getting Started
 
-## 2. Features
-- One-click capture of the active tab's URL.
-- Local, secure storage of your API key + secret (never sent to third parties).
-- Clear success and error states.
-- "Change API keys" flow to rotate or remove credentials.
-- Zero analytics / tracking scripts.
-- Local bundled font (Work Sans) to avoid external requests.
+### Prerequisites
 
-## 3. How It Works
-1. You click the extension icon.
-2. The popup loads and reads the current tab's URL.
-3. The extension sends a secure HTTPS request to `https://linkbucket.app/api/` with the necessary authentication.
-4. Success or error feedback is displayed.
+- [Node.js](https://nodejs.org/) v18+
+- A Chromium-based browser and/or Firefox
 
-## 4. Installation (Development)
-
-First, build the extension for your target browser:
+### Install & Build
 
 ```sh
-./scripts/build.sh           # build both Chrome and Firefox
-./scripts/build.sh chrome    # build Chrome only
-./scripts/build.sh firefox   # build Firefox only
+npm install
+npm run build
 ```
 
-### Chrome / Chromium
+### Load the Extension
+
+**Chrome / Chromium:**
+
 1. Open `chrome://extensions`
-2. Enable "Developer mode".
-3. Click "Load unpacked" and select the `dist/chrome/` directory.
-4. The extension icon should appear in your toolbar (pin it if needed).
+2. Enable **Developer mode**
+3. Click **Load unpacked** and select the `dist/chrome/` directory
 
-### Firefox
+**Firefox:**
+
 1. Open `about:debugging#/runtime/this-firefox`
-2. Click "Load Temporary Add-on..."
-3. Select `dist/firefox/manifest.json`.
-4. The extension icon should appear in your toolbar.
+2. Click **Load Temporary Add-on...**
+3. Select `dist/firefox/manifest.json`
 
-> **Note:** Temporary add-ons in Firefox do not persist across restarts. Reload from `about:debugging` after each restart during development.
+> Temporary add-ons in Firefox do not persist across restarts.
 
-## 5. Building / Packaging
-Run `./scripts/build.sh` to produce distributable zip files in `dist/`:
-- `dist/linkbucket-chrome.zip` — ready for the Chrome Web Store
-- `dist/linkbucket-firefox.zip` — ready for Firefox Add-ons (AMO)
+## How It Works
 
-The build script copies all shared source files and selects the correct browser-specific manifest (`manifest.chrome.json` or `manifest.firefox.json`).
+1. Click the extension icon
+2. The popup reads the current tab's URL
+3. A secure HTTPS request is sent to `https://linkbucket.app/api/` with your credentials
+4. Success or error feedback is displayed
 
-## 6. Permissions Rationale
-| Permission / Host | Why It’s Needed | Scope Limitation |
-|-------------------|-----------------|------------------|
-| `storage` | Persist user API key + secret locally so the user is not prompted every use. | Only the two credential values (and minimal UI state if added later). |
-| `activeTab` | Convenience: populate the URL field with the user's current tab upon click. | Only activated by explicit user action (clicking the icon). No background scraping. |
-| `https://linkbucket.app/api/*` | Allow network requests strictly to the Linkbucket backend. | No wildcard to unrelated domains. |
+## Project Structure
 
-### Not Requested (By Design)
-- No `<all_urls>` host permission.
-- No background page polling.
-- No content scripts altering page content.
-- No sync storage (avoids spreading credentials to other profiles/devices unintentionally).
+```
+├── src/popup/
+│   ├── popup.html          # Extension popup markup
+│   ├── popup.css           # Styles
+│   ├── popup.js            # Entry point — DOM, UI state, event handlers
+│   ├── api.js              # API fetch wrapper and URL lookup
+│   ├── storage.js          # browser.storage.local wrapper
+│   ├── tags.js             # Tom Select lifecycle (init, get, set, destroy)
+│   └── utils.js            # Pure helpers (URL validation, tag normalization)
+├── tests/                  # Unit tests
+├── assets/                 # Icons, images, bundled fonts
+├── manifest.chrome.json    # Chrome manifest (MV3)
+├── manifest.firefox.json   # Firefox manifest (MV3)
+├── scripts/build.sh        # Build script
+└── dist/                   # Build output (not committed)
+```
 
-## 7. Data & Privacy
-- API key + secret stored **locally** via the browser's extension storage API (`browser.storage.local`).
-- Not synced, sold, or shared.
-- Only transmitted to `linkbucket.app` (for authenticated link save calls).
-- No page contents, browsing history, or analytics captured.
-- Privacy Policies:
-  - Chrome Extension: https://linkbucket.app/chrome-extension-privacy
-  - Firefox Extension: https://linkbucket.app/firefox-extension-privacy
-  - General: https://linkbucket.app/privacy
+Vendor libraries (`tom-select`, `webextension-polyfill`) are installed via npm and copied into the build output automatically.
 
-## 8. Security Measures
-- No `eval`, dynamic code injection, or remote script loading.
-- Fonts are bundled (Work Sans) - no external font/CDN calls.
-- HTTPS enforced for API.
-- Minimal permission surface.
-- No console logging of credentials.
-- Simple, review-friendly code structure.
+## Scripts
 
-## 9. Managing API Keys
-- Use the "Change API keys" button in the popup to rotate or clear the stored credentials.
-- Uninstalling the extension removes all local stored data.
+| Command | Description |
+|---------|-------------|
+| `npm run build` | Build for both Chrome and Firefox |
+| `npm run build:chrome` | Build for Chrome only |
+| `npm run build:firefox` | Build for Firefox only |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Run ESLint with auto-fix |
+| `npm run format` | Format source files with Prettier |
+| `npm run format:check` | Check formatting without modifying files |
+| `npm test` | Run unit tests |
+| `npm run lint:ext` | Build and validate Firefox extension with addons-linter |
 
-## 10. Troubleshooting
-| Symptom | Possible Cause | Action |
-|---------|----------------|--------|
-| "Unauthorized" / 401 | Invalid or expired API key | Click "Change API keys" and re‑enter. |
-| No URL auto-filled | `activeTab` context not granted yet | Re-open the popup after focusing the desired tab. |
-| Network error | Offline or API outage | Check connection / status page. |
-| Popup closes during key setup | Browser closes popup on focus loss | Fields are saved automatically — reopen the popup and continue. |
+## Contributing
 
-## 11. FAQ
-**Q:** Does the extension track what I browse?
-**A:** No. It only grabs the current tab URL at the moment you click the icon.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, code style guidelines, and how to submit a pull request.
 
-**Q:** Are my API credentials encrypted?
-**A:** The browser stores extension data in its internal storage. For additional protection, rotate keys periodically from your Linkbucket account.
+## Permissions Rationale
 
-**Q:** Can I use multiple Linkbucket accounts?
-**A:** Not simultaneously; you can swap credentials using "Change API keys".
+| Permission / Host | Why It's Needed |
+|-------------------|-----------------|
+| `storage` | Persist API credentials locally so the user isn't prompted every time |
+| `activeTab` | Populate the URL field with the current tab's URL on click |
+| `https://linkbucket.app/api/*` | Network requests strictly to the Linkbucket backend |
 
-## 12. License
-MIT License. See [LICENSE](LICENSE).
+**Not requested (by design):** no `<all_urls>`, no background polling, no content scripts, no sync storage.
 
-## 13. Third-Party Assets / Notices
-- Work Sans font (SIL Open Font License 1.1). See `assets/fonts/NOTICE` and `assets/fonts/OFL-1.1.txt`.
-- [webextension-polyfill](https://github.com/mozilla/webextension-polyfill) (MPL-2.0). Provides the cross-browser `browser.*` API on Chrome.
+## Data & Privacy
 
-## 14. Support & Contact
-- Homepage: https://linkbucket.app
-- Privacy (Chrome Extension): https://linkbucket.app/chrome-extension-privacy
-- Privacy (Firefox Extension): https://linkbucket.app/firefox-extension-privacy
-- Email: hello@linkbucket.app
+- Credentials stored **locally** via `browser.storage.local` — never synced or shared
+- Only transmitted to `linkbucket.app` for authenticated API calls
+- No browsing history, page contents, or analytics captured
+- Privacy policies: [Chrome](https://linkbucket.app/chrome-extension-privacy) · [Firefox](https://linkbucket.app/firefox-extension-privacy) · [General](https://linkbucket.app/privacy)
 
-## 15. Changelog
-- 0.3.0: Add Firefox support. Cross-browser build system. Auto-persist key fields during setup.
-- 0.2.5: Enforce HTTPS-only URLs and disable URL field editing for better security.
-- 0.2.4: Improve tag input styling and typing performance.
-- 0.2.3: Align tag input behavior with main Linkbucket app.
-- 0.2.2: Support adding existing bookmarks.
-- 0.2.1: Switch tag loading to remote search-based fetching for improved performance.
-- 0.2.0: Added tag support.
-- 0.1.0: Initial release.
+## Troubleshooting
 
----
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| "Unauthorized" / 401 | Invalid or expired API key | Click "Change API keys" and re-enter |
+| No URL auto-filled | `activeTab` not yet granted | Re-open the popup after focusing the desired tab |
+| Network error | Offline or API outage | Check your connection |
+| Popup closes during key setup | Browser closes popup on focus loss | Fields are saved automatically — reopen and continue |
 
-If you are a reviewer: thank you. See the top-of-file comment in `src/popup/popup.js` for a concise justification of each permission and design choice.
+## FAQ
+
+**Does the extension track what I browse?**
+No. It only reads the current tab URL when you click the icon.
+
+**Are my API credentials encrypted?**
+They're stored in the browser's internal extension storage. Rotate keys periodically from your Linkbucket account for additional security.
+
+**Can I use multiple Linkbucket accounts?**
+Not simultaneously. Use "Change API keys" to switch.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+## Third-Party Notices
+
+- **Work Sans** font — SIL Open Font License 1.1. See `assets/fonts/NOTICE` and `assets/fonts/OFL-1.1.txt`.
+- **[webextension-polyfill](https://github.com/mozilla/webextension-polyfill)** — MPL-2.0. Provides the cross-browser `browser.*` API on Chrome.
+- **[Tom Select](https://tom-select.js.org/)** — Apache-2.0. Tag input widget.
