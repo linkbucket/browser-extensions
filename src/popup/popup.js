@@ -5,6 +5,7 @@ import {
   initTagsSelect,
   getSelectedTags,
   setTagValues,
+  blurTagSelect,
   destroyTagSelect,
 } from "./tags.js";
 
@@ -33,7 +34,6 @@ const $ = {
   tagsSelect: null,
   accessKeyId: null,
   secretKey: null,
-  submitButton: null,
 };
 
 // Track current URL record (if already saved for this user)
@@ -44,12 +44,13 @@ async function showUrlForm() {
   $.keyForm.style.display = "none";
   $.urlForm.style.display = "block";
 
-  const tabUrl = await getActiveTabUrl();
+  const [tabUrl] = await Promise.all([
+    getActiveTabUrl(),
+    initTagsSelect($.tagsSelect, apiFetch),
+  ]);
   if (tabUrl) {
     $.urlInput.value = tabUrl;
   }
-
-  await initTagsSelect($.tagsSelect, apiFetch);
 
   // Reset previous lookup state
   existingUrlRecord = null;
@@ -72,6 +73,11 @@ async function showUrlForm() {
   } else {
     showResult(""); // clear if URL is invalid or missing
   }
+
+  // Prevent tag input from stealing focus on popup open —
+  // deferred because the browser autofocuses the first editable
+  // input (the readonly URL field is skipped) after our code runs.
+  setTimeout(() => blurTagSelect(), 0);
 }
 
 function showKeyForm(message = "") {
@@ -182,7 +188,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   $.tagsSelect = document.getElementById("tags");
   $.accessKeyId = document.getElementById("accessKeyId");
   $.secretKey = document.getElementById("secretKey");
-  $.submitButton = $.urlForm.querySelector('button[type="submit"]');
 
   // Determine initial view
   const { accessKeyId, secretKey } = await storage.get([

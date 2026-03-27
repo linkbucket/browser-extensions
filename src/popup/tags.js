@@ -24,7 +24,6 @@ export async function initTagsSelect(selectElement, apiFetchFn) {
     maxOptions: 50,
     preload: false,
     loadThrottle: 300,
-    dropdownParent: "body",
 
     // Clear textbox and refresh options after adding an item
     onItemAdd: function () {
@@ -96,6 +95,10 @@ export function setTagValues(tags) {
   });
 
   tagSelect.setValue(tagIds, true);
+}
+
+export function blurTagSelect() {
+  tagSelect?.blur();
 }
 
 export function destroyTagSelect() {

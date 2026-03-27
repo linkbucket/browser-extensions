@@ -21,6 +21,8 @@
   --color-border: #000;
   --color-accent: #ffaa8e;
   --color-accent-hover: #ff9877;
+  --color-tag-bg: hsl(20.63deg, 84.21%, 85.1%);
+  --color-tag-hover: hsl(130deg, 32%, 51%);
   --radius-input: 8px;
   --radius-button: 25px;
   --space-form-gap: 10px;
@@ -193,6 +195,15 @@ form:not([style*="display:none"]) {
 }
 
 /* Tom Select overrides to match input styling */
+.ts-control,
+.ts-control input,
+.ts-dropdown {
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
 .ts-wrapper.multi .ts-control {
   padding: 0 0.65em;
   min-height: 50px;
@@ -209,13 +220,51 @@ form:not([style*="display:none"]) {
 }
 
 .ts-wrapper.multi .ts-control > input {
+  height: auto !important;
   padding: 0;
   margin: 0;
-  line-height: 50px;
+  font-size: var(--fs-input) !important;
+  line-height: 1.4 !important;
 }
 
-.ts-wrapper.multi .ts-control > .item {
-  margin: 6px 4px 6px 0;
+.ts-wrapper.multi.has-items .ts-control > input {
+  flex: 1 1 0 !important;
+  min-width: 4rem !important;
+  line-height: inherit;
+}
+
+.ts-wrapper.multi.has-items .ts-control {
+  gap: 6px;
+  padding: 8px 0.65em;
+  min-height: 50px;
+}
+
+/* Tag pills */
+.ts-wrapper.multi .ts-control > div {
+  background: var(--color-tag-bg);
+  border: 0;
+  border-radius: 0.625rem;
+  color: inherit;
+  margin: 0;
+  padding: 4px 8px;
+}
+
+.ts-wrapper.multi .ts-control > div.active {
+  background: var(--color-tag-hover);
+  color: #fff;
+}
+
+/* Remove button on tag pills */
+.ts-wrapper.plugin-remove_button .item .remove {
+  border-radius: 0 0.625rem 0.625rem 0;
+}
+
+.ts-wrapper.plugin-remove_button:not(.rtl) .item .remove {
+  border-left-color: hsl(20.63deg 84.21% 75%);
+}
+
+.ts-wrapper.plugin-remove_button:not(.rtl) .item.active .remove {
+  border-left-color: hsl(130deg 32% 41%);
 }
 
 .ts-wrapper.multi.focus .ts-control {
@@ -223,8 +272,33 @@ form:not([style*="display:none"]) {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 
-/* Tom Select dropdown */
+/* Tom Select dropdown (opens upward) */
 .ts-dropdown {
-  max-height: 200px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input) var(--radius-input) 0 0;
+  border-bottom: 0;
+  box-shadow: 0 -4px 12px hsl(0deg 0% 0% / 0.15);
+  overflow: hidden;
+  top: auto;
+  bottom: 100%;
+}
+
+.ts-dropdown-content {
+  height: 200px;
   overflow-y: auto;
+}
+
+.ts-dropdown .option,
+.ts-dropdown .create,
+.ts-dropdown .no-results {
+  padding: 10px 12px;
+}
+
+.ts-dropdown .active {
+  background-color: hsl(20.63deg 84.21% 95%);
+  color: inherit;
+}
+
+.ts-dropdown [data-selectable] .highlight {
+  background: hsl(20.63deg 84.21% 85.1% / 0.5);
 }
