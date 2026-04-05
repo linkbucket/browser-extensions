@@ -47,7 +47,7 @@ export async function initTagsSelect(selectElement, apiFetchFn) {
     load: async (query, callback) => {
       try {
         const q = encodeURIComponent(query || "");
-        const response = await apiFetchFn(`/user_tags?query=${q}`);
+        const response = await apiFetchFn(`/tags?query=${q}`);
         if (!response.ok) {
           console.error(
             "Failed to load tags:",
