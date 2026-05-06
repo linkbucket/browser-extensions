@@ -99,3 +99,7 @@ Please [open an issue](https://github.com/linkbucket/browser-extensions/issues/n
 ## Requesting Features
 
 [Open a feature request](https://github.com/linkbucket/browser-extensions/issues/new?template=feature_request.md) describing the use case and what you'd like to see.
+
+## Releases
+
+Releases are cut by maintainers — see [RELEASING.md](RELEASING.md) for the full process.

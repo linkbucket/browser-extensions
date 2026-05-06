@@ -89,6 +89,10 @@ Vendor libraries (`tom-select`, `webextension-polyfill`) are installed via npm a
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, code style guidelines, and how to submit a pull request.
 
+## Release Process
+
+Maintainers tag and publish new versions per [RELEASING.md](RELEASING.md).
+
 ## Permissions Rationale
 
 | Permission / Host | Why It's Needed |
