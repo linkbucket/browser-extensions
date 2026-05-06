@@ -13,7 +13,7 @@ How to publish a new version of the Linkbucket browser extension.
 ## Checklist
 
 1. **Bump version** in `package.json`, `manifest.chrome.json`, and `manifest.firefox.json`. `scripts/build.sh` enforces version sync at build time — it errors if any of the three drift.
-2. **Update the Changelog section** in `README.md` with a one-line summary of what changed.
+2. **Update `CHANGELOG.md`** — add a one-line summary under `[Unreleased]`, then rename that heading to the new version (e.g. `[Unreleased]` → `[0.4.2]`) and add a fresh empty `[Unreleased]` section at the top.
 3. **Smoke-test locally** in both Chrome and Firefox by loading `dist/chrome/` and `dist/firefox/manifest.json`:
    - Save a new URL
    - Save the same URL again (exercises the lookup + PATCH path)

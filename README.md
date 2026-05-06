@@ -132,16 +132,7 @@ Not simultaneously. Use "Change API keys" to switch.
 
 ## Changelog
 
-- **0.4.1** — Update tag search endpoint from `/user_tags` to `/tags`
-- **0.4.0** — Restyle Tom Select tags to match web app; switch to dropup dropdown; fix autofocus and cursor sizing
-- **0.3.0** — Add Firefox support; cross-browser build system; auto-persist key fields during setup
-- **0.2.5** — Enforce HTTPS-only URLs and disable URL field editing
-- **0.2.4** — Improve tag input styling and typing performance
-- **0.2.3** — Align tag input behavior with main Linkbucket app
-- **0.2.2** — Support adding existing bookmarks
-- **0.2.1** — Switch tag loading to remote search-based fetching
-- **0.2.0** — Add tag support
-- **0.1.0** — Initial release
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
