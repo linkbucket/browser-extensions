@@ -20,6 +20,9 @@
   },
   "permissions": ["storage", "activeTab"],
   "host_permissions": ["https://linkbucket.app/api/*"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
   "homepage_url": "https://linkbucket.app",
   "author": "Linkbucket Team"
 }
