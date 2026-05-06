@@ -7,7 +7,7 @@
   "homepage": "https://linkbucket.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/linkbucketapp/browser-extensions.git"
+    "url": "https://github.com/linkbucket/browser-extensions.git"
   },
   "license": "MIT",
   "scripts": {

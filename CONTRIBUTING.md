@@ -12,7 +12,7 @@ Thanks for your interest in contributing! This guide will help you get set up an
 
 ```sh
 # Clone the repository
-git clone https://github.com/linkbucketapp/browser-extensions.git
+git clone https://github.com/linkbucket/browser-extensions.git
 cd browser-extensions
 
 # Install dependencies
@@ -90,7 +90,7 @@ Vendor libraries (`tom-select`, `webextension-polyfill`) are installed via npm a
 
 ## Reporting Bugs
 
-Please [open an issue](https://github.com/linkbucketapp/browser-extensions/issues/new?template=bug_report.md) with:
+Please [open an issue](https://github.com/linkbucket/browser-extensions/issues/new?template=bug_report.md) with:
 
 - Browser name and version
 - Steps to reproduce
@@ -98,4 +98,4 @@ Please [open an issue](https://github.com/linkbucketapp/browser-extensions/issue
 
 ## Requesting Features
 
-[Open a feature request](https://github.com/linkbucketapp/browser-extensions/issues/new?template=feature_request.md) describing the use case and what you'd like to see.
+[Open a feature request](https://github.com/linkbucket/browser-extensions/issues/new?template=feature_request.md) describing the use case and what you'd like to see.
