@@ -13,6 +13,12 @@ Supports **Google Chrome** (and Chromium-based browsers) and **Mozilla Firefox**
 - Zero analytics or tracking scripts
 - Bundled fonts — no external CDN requests
 
+## Getting Your API Keys
+
+The extension authenticates with your Linkbucket account using a personal access key pair. Sign up (or sign in) at [linkbucket.app](https://linkbucket.app), open the **API Keys** entry in the main navigation, and create a new key. You'll get an **Access Key ID** and a **Secret Key** — paste both into the extension's setup form on first launch.
+
+Keep the Secret Key private; it's stored locally by the extension and only ever sent to `linkbucket.app`.
+
 ## Getting Started
 
 ### Prerequisites

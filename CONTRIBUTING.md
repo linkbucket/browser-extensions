@@ -6,7 +6,9 @@ Thanks for your interest in contributing! This guide will help you get set up an
 
 - [Node.js](https://nodejs.org/) (v18 or later)
 - A Chromium-based browser (Chrome, Edge, Brave, etc.) and/or Firefox
-- A [Linkbucket](https://linkbucket.app) account with API keys (for manual testing)
+- A [Linkbucket](https://linkbucket.app) account with API keys (for manual testing) — sign in and open **API Keys** in the main navigation to create a key pair
+
+> **Heads-up:** The extension only talks to production (`linkbucket.app`). Manual testing during development hits real production data, so use a test account or be careful what you save.
 
 ## Getting Started
 
