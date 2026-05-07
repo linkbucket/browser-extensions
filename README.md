@@ -23,7 +23,7 @@ Keep the Secret Key private; it's stored locally by the extension and only ever 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v18+
+- [Node.js](https://nodejs.org/) v22+
 - A Chromium-based browser and/or Firefox
 
 ### Install & Build

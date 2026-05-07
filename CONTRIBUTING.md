@@ -4,7 +4,7 @@ Thanks for your interest in contributing! This guide will help you get set up an
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or later)
+- [Node.js](https://nodejs.org/) (v22 or later)
 - A Chromium-based browser (Chrome, Edge, Brave, etc.) and/or Firefox
 - A [Linkbucket](https://linkbucket.app) account with API keys (for manual testing) — sign in and open **API Keys** in the main navigation to create a key pair
 
