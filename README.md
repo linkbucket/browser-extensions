@@ -75,7 +75,7 @@ npm run build
 └── dist/                   # Build output (not committed)
 ```
 
-Vendor libraries (`tom-select`, `webextension-polyfill`) are installed via npm and copied into the build output automatically.
+Vendor libraries (`tom-select`) are installed via npm and copied into the build output automatically.
 
 ## Scripts
 
@@ -147,5 +147,4 @@ MIT — see [LICENSE](LICENSE).
 ## Third-Party Notices
 
 - **Work Sans** font — SIL Open Font License 1.1. See `assets/fonts/NOTICE` and `assets/fonts/OFL-1.1.txt`.
-- **[webextension-polyfill](https://github.com/mozilla/webextension-polyfill)** — MPL-2.0. Provides the cross-browser `browser.*` API on Chrome.
 - **[Tom Select](https://tom-select.js.org/)** — Apache-2.0. Tag input widget.
