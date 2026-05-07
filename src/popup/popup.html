@@ -78,8 +78,8 @@
 
     <div id="result" class="small"></div>
 
-    <!-- WebExtension API polyfill (provides browser.* on Chrome) -->
-    <script src="/vendor/webextension-polyfill/browser-polyfill.min.js"></script>
+    <!-- Alias chrome.* to browser.* on Chromium (Firefox exposes browser natively) -->
+    <script src="browser-shim.js"></script>
 
     <!-- Tom Select library (local UMD build) -->
     <script src="/vendor/tom-select/tom-select.complete.min.js"></script>

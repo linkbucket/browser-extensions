@@ -37,10 +37,6 @@ copy_vendor_files() {
   mkdir -p "$target_dir/vendor/tom-select"
   cp "$NODE_MODULES/tom-select/dist/js/tom-select.complete.min.js" "$target_dir/vendor/tom-select/"
   cp "$NODE_MODULES/tom-select/dist/css/tom-select.min.css" "$target_dir/vendor/tom-select/"
-
-  # webextension-polyfill
-  mkdir -p "$target_dir/vendor/webextension-polyfill"
-  cp "$NODE_MODULES/webextension-polyfill/dist/browser-polyfill.min.js" "$target_dir/vendor/webextension-polyfill/"
 }
 
 build_target() {

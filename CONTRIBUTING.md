@@ -81,7 +81,7 @@ Please ensure your changes pass both checks before opening a pull request.
 └── dist/                   # Build output (not committed)
 ```
 
-Vendor libraries (`tom-select`, `webextension-polyfill`) are installed via npm and copied into the build output by the build script. Do not add files to a `vendor/` directory manually.
+The `tom-select` vendor library is installed via npm and copied into the build output by the build script. Do not add files to a `vendor/` directory manually.
 
 ## Submitting Changes
 
