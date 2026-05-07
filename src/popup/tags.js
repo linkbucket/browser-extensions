@@ -21,7 +21,7 @@ export async function initTagsSelect(selectElement, apiFetchFn) {
     labelField: "title",
     searchField: ["title"],
     placeholder: selectElement.getAttribute("placeholder") || "Add tags...",
-    maxOptions: 50,
+    maxOptions: 50, // perf cap - Tom Select renders all options as DOM nodes
     preload: false,
     loadThrottle: 300,
 
