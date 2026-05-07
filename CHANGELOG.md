@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.2]
+
+- Replace webextension-polyfill with a native chrome/browser shim (smaller bundle)
+- Add explicit Manifest V3 content security policy
+- Bump tom-select to 2.6.0
+
 ## [0.4.1]
 
 - Update tag search endpoint from `/user_tags` to `/tags`
