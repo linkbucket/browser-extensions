@@ -13,8 +13,12 @@ describe("apiFetch", () => {
 
   beforeEach(() => {
     fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
-    globalThis.fetch = fetchMock;
+    vi.stubGlobal("fetch", fetchMock);
     storage.get.mockReset();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("sends empty-string auth headers when keys are not set", async () => {
@@ -48,7 +52,7 @@ describe("lookupUrl", () => {
 
   beforeEach(() => {
     fetchMock = vi.fn();
-    globalThis.fetch = fetchMock;
+    vi.stubGlobal("fetch", fetchMock);
     storage.get.mockReset();
     storage.get.mockResolvedValue({});
     errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -56,6 +60,7 @@ describe("lookupUrl", () => {
 
   afterEach(() => {
     errorSpy.mockRestore();
+    vi.unstubAllGlobals();
   });
 
   it("returns null on a 404 response", async () => {
