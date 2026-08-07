@@ -30,9 +30,9 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.8.0",
-    "globals": "^17.8.0",
+    "globals": "^17.9.0",
     "prettier": "^3.9.6",
     "vitest": "^4.1.10",
-    "web-ext": "^10.5.0"
+    "web-ext": "^10.6.0"
   }
 }
