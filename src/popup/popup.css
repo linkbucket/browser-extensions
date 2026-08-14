@@ -120,6 +120,33 @@ form input:focus {
   box-shadow: 0 0 0 2px rgba(38, 32, 94, 0.12);
 }
 
+/* The page being saved: tab title with the URL beneath */
+.pageinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 12px;
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-input);
+}
+
+.pageinfo__title {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pageinfo__url {
+  overflow: hidden;
+  font-size: 11px;
+  color: var(--color-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Placement cards (My Links + one per folder) */
 .placement-card {
   padding: 14px;
@@ -127,6 +154,24 @@ form input:focus {
   background: #fff;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-card);
+}
+
+/* My Links unchecked: greyed, tag field hidden (selections survive) */
+.placement-card--off {
+  background: #faf8f3;
+}
+
+.placement-card--off .placement-card__name {
+  color: var(--color-muted);
+}
+
+.placement-card--off .placement-card__header {
+  margin-bottom: 0;
+}
+
+.placement-card--off .ts-wrapper,
+.placement-card--off select {
+  display: none;
 }
 
 #folder-cards .placement-card {
@@ -140,16 +185,23 @@ form input:focus {
   margin-bottom: 9px;
 }
 
+.placement-card__name {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.placement-card__check {
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  accent-color: var(--color-accent);
+}
+
 .placement-pill {
   padding: 3px 12px;
   font-size: 12px;
   font-weight: bold;
   border-radius: 99px;
-}
-
-.placement-pill--my-links {
-  color: #fff;
-  background: var(--color-ink);
 }
 
 .placement-pill--folder {
@@ -252,6 +304,11 @@ button[type="submit"]:hover,
 button[type="submit"]:focus {
   background: var(--color-accent-hover);
   outline: none;
+}
+
+button[type="submit"]:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 /* Text-style secondary action */

@@ -53,24 +53,23 @@
 
     <!-- URL save form -->
     <form id="url-form" style="display: none">
-      <label for="url">URL</label>
-      <input
-        type="url"
-        name="url"
-        id="url"
-        pattern="https://.*"
-        spellcheck="false"
-        autocorrect="off"
-        autocapitalize="off"
-        readonly
-        required
-      />
+      <div class="pageinfo">
+        <div class="pageinfo__title" id="pageTitle"></div>
+        <div class="pageinfo__url" id="pageUrl"></div>
+      </div>
 
       <!-- Placement cards: My Links plus one card per folder -->
       <section class="placement-card" id="my-links-card">
         <div class="placement-card__header">
-          <span class="placement-pill placement-pill--my-links">My Links</span>
-          <span class="placement-card__meta">private · always saved here</span>
+          <span class="placement-card__name">My Links</span>
+          <span class="placement-card__meta" id="myLinksMeta">private</span>
+          <input
+            type="checkbox"
+            id="myLinksCheck"
+            class="placement-card__check"
+            title="Save to My Links"
+            checked
+          />
         </div>
         <select
           id="tags"
@@ -101,15 +100,13 @@
       </template>
 
       <div id="add-folder-row">
-        <button type="button" id="addFolder">
-          + Also add to a shared folder
-        </button>
+        <button type="button" id="addFolder">+ Add to folder</button>
         <select id="folderPicker" style="display: none"></select>
       </div>
 
       <div class="actions">
         <button id="resetKeys" type="button">Change API Keys</button>
-        <button id="saveButton" type="submit">Save link</button>
+        <button id="saveButton" type="submit">Save</button>
       </div>
     </form>
 

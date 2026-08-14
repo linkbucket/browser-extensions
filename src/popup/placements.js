@@ -61,6 +61,7 @@ export function addFolderCard(folder, tags = []) {
     .addEventListener("click", () => removeFolderCard(folder.id));
 
   cards.set(folder.id, { folder, card, tagSelect });
+  refreshAddButtonLabel();
   onChange?.();
 }
 
@@ -148,6 +149,13 @@ function closeFolderPicker() {
 
   $.picker.style.display = "none";
   $.addButton.style.display = "";
-  $.addButton.textContent = "+ Also add to a shared folder";
+  refreshAddButtonLabel();
   $.addButton.disabled = false;
+}
+
+function refreshAddButtonLabel() {
+  if (!$.addButton) return;
+
+  $.addButton.textContent =
+    cards.size > 0 ? "+ Add to another folder" : "+ Add to folder";
 }
