@@ -78,7 +78,7 @@ async function showUrlForm() {
       // One card per folder this link already lives in
       hydratePlacements(record.placements);
 
-      showResult("");
+      showResult("Already in your bucket. Saving updates it.");
     } else {
       showResult(""); // clear any old message
     }
