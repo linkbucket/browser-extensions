@@ -10,6 +10,9 @@ import {
 // One card per folder placement, keyed by folder id
 const cards = new Map();
 
+// Tom Select instance for the folder picker (exists only while choosing)
+let pickerSelect = null;
+
 const $ = {
   stack: null,
   template: null,
@@ -33,10 +36,6 @@ export function initPlacements({
   onChange = changed;
 
   $.addButton.addEventListener("click", openFolderPicker);
-  $.picker.addEventListener("change", handlePickerChange);
-  // Closing the native dropdown without choosing leaves the picker focused;
-  // restore the add button on blur so the row never looks stuck.
-  $.picker.addEventListener("blur", closeFolderPicker);
 }
 
 export function addFolderCard(folder, tags = []) {
@@ -108,6 +107,8 @@ export function destroyPlacements() {
 }
 
 async function openFolderPicker() {
+  if (!window.TomSelect) return;
+
   $.addButton.disabled = true;
 
   const folders = normalizeFolders(await fetchFolders()).filter(
@@ -121,32 +122,59 @@ async function openFolderPicker() {
     return;
   }
 
-  $.picker.replaceChildren(
-    new Option("Choose a folder…", "", true, true),
-    ...folders.map((folder) => {
-      const option = new Option(folderLabel(folder), folder.id);
-      option.dataset.folder = JSON.stringify(folder);
-      return option;
-    }),
-  );
-  $.picker.options[0].disabled = true;
+  const byId = new Map(folders.map((folder) => [folder.id, folder]));
 
   $.addButton.style.display = "none";
   $.picker.style.display = "";
-  $.picker.focus();
-}
 
-function handlePickerChange() {
-  const option = $.picker.selectedOptions[0];
-  if (option?.dataset.folder) {
-    addFolderCard(JSON.parse(option.dataset.folder));
-  }
-  closeFolderPicker();
+  // The same Tom Select as the tag fields, in single mode, so every
+  // dropdown in the popup shares one look — and the list is searchable.
+  pickerSelect = new window.TomSelect($.picker, {
+    options: folders.map((folder) => ({
+      id: folder.id,
+      title: folderLabel(folder),
+    })),
+    valueField: "id",
+    labelField: "title",
+    searchField: ["title"],
+    placeholder: "Choose a folder…",
+    maxItems: 1,
+    create: false,
+    openOnFocus: true,
+    selectOnTab: true,
+    // The picker sits at the popup's bottom with no room below, unlike
+    // the tag fields — so instead of fitting the list into that room,
+    // extend the body while choosing: the popup window resizes to
+    // content, and closeFolderPicker snaps it back.
+    onDropdownOpen(dropdown) {
+      const listHeight = Math.min(byId.size, 5) * 38;
+      const content = dropdown.querySelector(".ts-dropdown-content");
+      if (content) content.style.maxHeight = `${listHeight}px`;
+      document.body.style.minHeight = `${
+        this.control.getBoundingClientRect().bottom + listHeight + 16
+      }px`;
+    },
+    onItemAdd(value) {
+      const folder = byId.get(value);
+      if (folder) addFolderCard(folder);
+      // Deferred: destroying the instance from inside its own event
+      // handler would pull internals out from under Tom Select.
+      setTimeout(closeFolderPicker, 0);
+    },
+  });
+  pickerSelect.on("blur", closeFolderPicker);
+  pickerSelect.focus();
 }
 
 function closeFolderPicker() {
   if (!$.picker) return;
 
+  // Null first: destroy() fires a blur that would re-enter this handler
+  const instance = pickerSelect;
+  pickerSelect = null;
+  instance?.destroy();
+
+  document.body.style.minHeight = "";
   $.picker.style.display = "none";
   $.addButton.style.display = "";
   refreshAddButtonLabel();

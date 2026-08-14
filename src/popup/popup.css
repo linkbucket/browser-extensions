@@ -271,6 +271,37 @@ form input:focus {
   font-size: var(--fs-input);
 }
 
+/* Folder picker: single-mode Tom Select matching the input styling */
+.ts-wrapper.single .ts-control {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 5px 36px 5px 12px;
+  font-size: var(--fs-input);
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-input);
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
+}
+
+.ts-wrapper.single.focus .ts-control,
+.ts-wrapper.single.dropdown-active .ts-control {
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 2px rgba(38, 32, 94, 0.12);
+}
+
+/* Disclosure chevron, tucked in from the edge */
+.ts-wrapper.single .ts-control::after {
+  right: 16px;
+  border-color: var(--color-muted) transparent transparent;
+}
+
+.ts-wrapper.single.dropdown-active .ts-control::after {
+  border-color: transparent transparent var(--color-muted);
+}
+
 /* Actions row (shared) */
 .actions {
   display: flex;

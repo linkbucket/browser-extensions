@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - My Links is optional: a checkbox on its card enables folder-only saves
 - Show the page title with the URL beneath it instead of a raw URL field
 - Tag suggestions open downward and size themselves to the room below the field
+- The folder picker is the same searchable Tom Select control as the tag fields
 - Compact restyle following the design explorations: smaller fields and spacing, and a bucket mark + wordmark header replacing the large illustration
 
 ## [0.4.2]

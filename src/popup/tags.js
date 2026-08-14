@@ -1,5 +1,15 @@
 import { normalizeTags, splitSelectedTags } from "./utils.js";
 
+// Fill the room between a control and the popup's bottom edge, quantized
+// to whole rows so the list never ends mid-option. The three-row floor is
+// what the tightest layout (My Links only, no folder cards) has room for.
+export function sizeDropdownToRoom(control, dropdown) {
+  const room = window.innerHeight - control.getBoundingClientRect().bottom - 12;
+  const rows = Math.max(3, Math.floor(room / 38));
+  const content = dropdown.querySelector(".ts-dropdown-content");
+  if (content) content.style.maxHeight = `${rows * 38}px`;
+}
+
 // Creates a Tom Select tag control on selectElement. `load` is called with
 // the typed query and must resolve to a tag options array ({id, title}).
 // Returns a handle, or null when Tom Select is unavailable.
@@ -40,16 +50,8 @@ export function createTagSelect(selectElement, load) {
     // Don't prioritize adding new items over existing matches
     addPrecedence: false,
 
-    // Fill the room between the field and the popup's bottom edge,
-    // quantized to whole rows so the list never ends mid-option. The
-    // three-row floor is what the tightest layout (My Links only, no
-    // folder cards) has room for.
     onDropdownOpen(dropdown) {
-      const room =
-        window.innerHeight - this.control.getBoundingClientRect().bottom - 12;
-      const rows = Math.max(3, Math.floor(room / 38));
-      const content = dropdown.querySelector(".ts-dropdown-content");
-      if (content) content.style.maxHeight = `${rows * 38}px`;
+      sizeDropdownToRoom(this.control, dropdown);
     },
 
     load: async (query, callback) => {
