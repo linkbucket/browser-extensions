@@ -61,7 +61,20 @@ export function folderMeta(folder) {
     : "private";
 }
 
-// Build the API placements payload from per-card selections:
+// Case-insensitive filter for the destination list's folder search,
+// matching the folder name or (for shared folders) the owner's name
+export function filterFolders(folders, query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return folders;
+
+  return folders.filter(
+    (folder) =>
+      folder.title.toLowerCase().includes(q) ||
+      (folder.shared && folder.owner_name.toLowerCase().includes(q)),
+  );
+}
+
+// Build the API placements payload from per-row selections:
 // [{folderId, values}] where values are a tag select's raw values
 // (existing folder_tag ids and "new:name" entries)
 export function buildPlacementsPayload(cardSelections) {

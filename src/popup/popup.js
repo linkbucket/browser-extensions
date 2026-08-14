@@ -10,9 +10,9 @@ import {
 } from "./tags.js";
 import {
   initPlacements,
+  loadFolders,
   hydratePlacements,
   getPlacements,
-  placementCount,
   destroyPlacements,
 } from "./placements.js";
 
@@ -39,7 +39,6 @@ const $ = {
   resultDiv: null,
   resetKeysBtn: null,
   tagsSelect: null,
-  saveButton: null,
   accessKeyId: null,
   secretKey: null,
 };
@@ -55,6 +54,7 @@ async function showUrlForm() {
   const [tabUrl] = await Promise.all([
     getActiveTabUrl(),
     initTagsSelect($.tagsSelect, apiFetch),
+    loadFolders(),
   ]);
   if (tabUrl) {
     $.urlInput.value = tabUrl;
@@ -75,10 +75,10 @@ async function showUrlForm() {
         setTagValues(record.tags);
       }
 
-      // One card per folder this link already lives in
+      // Check the folders this link already lives in and fill their rows
       hydratePlacements(record.placements);
 
-      showResult("");
+      showResult("Already in your bucket. Saving updates it.");
     } else {
       showResult(""); // clear any old message
     }
@@ -182,14 +182,6 @@ async function handleUrlSubmit(e) {
   }
 }
 
-// "Save link" for a plain save; "Save N placements" once folder cards
-// exist (My Links counts as one placement)
-function updateSaveButton() {
-  const count = 1 + placementCount();
-  $.saveButton.textContent =
-    count > 1 ? `Save ${count} placements` : "Save link";
-}
-
 async function handleResetKeys() {
   await storage.remove(["accessKeyId", "secretKey"]);
   existingUrlRecord = null;
@@ -212,16 +204,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   $.resultDiv = document.getElementById("result");
   $.resetKeysBtn = document.getElementById("resetKeys");
   $.tagsSelect = document.getElementById("tags");
-  $.saveButton = document.getElementById("saveButton");
   $.accessKeyId = document.getElementById("accessKeyId");
   $.secretKey = document.getElementById("secretKey");
 
   initPlacements({
-    stack: document.getElementById("folder-cards"),
-    template: document.getElementById("folder-card-template"),
-    addButton: document.getElementById("addFolder"),
-    picker: document.getElementById("folderPicker"),
-    changed: updateSaveButton,
+    folderList: document.getElementById("folder-list"),
+    destinationTemplate: document.getElementById("destination-template"),
+    folderTagRows: document.getElementById("folder-tag-rows"),
+    tagRowTemplate: document.getElementById("tag-row-template"),
+    search: document.getElementById("folderSearch"),
   });
 
   // Determine initial view

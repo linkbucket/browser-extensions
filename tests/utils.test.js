@@ -6,6 +6,7 @@ import {
   normalizeFolders,
   folderLabel,
   folderMeta,
+  filterFolders,
   buildPlacementsPayload,
 } from "../src/popup/utils.js";
 
@@ -257,5 +258,28 @@ describe("buildPlacementsPayload", () => {
 
   it("returns an empty array for no cards", () => {
     expect(buildPlacementsPayload([])).toEqual([]);
+  });
+});
+
+describe("filterFolders", () => {
+  const folders = [
+    { title: "Recipes", shared: false, owner_name: "" },
+    { title: "Research", shared: true, owner_name: "User Two" },
+  ];
+
+  it("returns everything for a blank query", () => {
+    expect(filterFolders(folders, "  ")).toEqual(folders);
+  });
+
+  it("matches folder names case-insensitively", () => {
+    expect(filterFolders(folders, "recip")).toEqual([folders[0]]);
+  });
+
+  it("matches a shared folder's owner name", () => {
+    expect(filterFolders(folders, "user two")).toEqual([folders[1]]);
+  });
+
+  it("returns an empty array when nothing matches", () => {
+    expect(filterFolders(folders, "zzz")).toEqual([]);
   });
 });

@@ -119,44 +119,60 @@ form input:focus {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 
-/* Placement cards (My Links + one per folder) */
-.placement-card {
-  padding: 12px;
-  margin-top: var(--space-label-top);
-  background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-}
-
-#folder-cards .placement-card {
-  margin-top: var(--space-form-gap);
-}
-
-.placement-card__header {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.placement-pill {
-  padding: 3px 12px;
-  font-size: 13px;
+/* Step headings for the destination and tags sections */
+form label.step-label {
+  font-size: 16px;
   font-weight: bold;
-  border-radius: 99px;
 }
 
-.placement-pill--my-links {
+.step-label__note {
+  font-size: 13px;
+  font-weight: normal;
+  color: hsl(0deg, 0%, 38%);
+}
+
+/* Destination checklist (My Links + one row per folder) */
+#folder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 176px;
+  margin-top: 5px;
+  overflow-y: auto;
+}
+
+form label.destination {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding: 9px 12px;
+  margin: 0;
+  font-size: 15px;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid hsl(0deg, 0%, 60%);
+  border-radius: 10px;
+}
+
+form label.destination:has(input:checked) {
   color: #fff;
   background: #000;
+  border-color: var(--color-border);
 }
 
-.placement-pill--folder {
-  color: #000;
-  background: var(--color-tag-bg);
+/* My Links is always saved; its locked row shouldn't invite a click */
+form label.destination:has(input:disabled) {
+  cursor: default;
 }
 
-.placement-card__meta {
+.destination input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+}
+
+.destination__meta {
+  margin-left: auto;
   overflow: hidden;
   font-size: 12px;
   color: hsl(0deg, 0%, 38%);
@@ -164,62 +180,37 @@ form input:focus {
   white-space: nowrap;
 }
 
-.placement-card__remove {
-  padding: 2px 6px;
-  margin-left: auto;
-  font-size: 13px;
-  color: hsl(0deg, 0%, 38%);
-  cursor: pointer;
-  background: none;
-  border: none;
+form label.destination:has(input:checked) .destination__meta {
+  color: hsl(0deg, 0%, 80%);
 }
 
-.placement-card__remove:hover,
-.placement-card__remove:focus {
-  color: #000;
-  outline: none;
+form input#folderSearch {
+  height: 40px;
+  margin-top: 5px;
+  font-size: 14px;
 }
 
-/* Cards use a white background, so their tag fields keep a visible edge */
-.placement-card .ts-wrapper.multi .ts-control {
-  border-color: hsl(0deg, 0%, 60%);
-}
-
-/* Add-to-folder affordance */
-#add-folder-row {
+/* One tag row per destination, labeled with where the tags land */
+.tag-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
   margin-top: var(--space-form-gap);
 }
 
-#addFolder {
-  width: 100%;
-  padding: 10px 14px;
-  font-size: 15px;
-  color: hsl(0deg, 0%, 30%);
-  cursor: pointer;
-  background: none;
-  border: 1.5px dashed hsl(0deg, 0%, 55%);
-  border-radius: 12px;
+.tag-row__label {
+  flex-shrink: 0;
+  min-width: 64px;
+  overflow: hidden;
+  font-size: 12px;
+  color: hsl(0deg, 0%, 38%);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-#addFolder:hover,
-#addFolder:focus {
-  color: #000;
-  border-color: var(--color-border);
-  outline: none;
-}
-
-#addFolder:disabled {
-  cursor: wait;
-  opacity: 0.6;
-}
-
-#folderPicker {
-  width: 100%;
-  height: 44px;
-  padding: 0 0.65em;
-  background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-input);
+.tag-row .ts-wrapper {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Actions row (shared) */
