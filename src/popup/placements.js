@@ -155,11 +155,16 @@ async function openFolderPicker() {
       }px`;
     },
     onItemAdd(value) {
-      const folder = byId.get(value);
-      if (folder) addFolderCard(folder);
       // Deferred: destroying the instance from inside its own event
-      // handler would pull internals out from under Tom Select.
-      setTimeout(closeFolderPicker, 0);
+      // handler would pull internals out from under Tom Select. The card
+      // is added in the same tick as the teardown so the popup reflows
+      // once - card first would briefly stack card + picker + reserved
+      // height and flash a taller window.
+      setTimeout(() => {
+        closeFolderPicker();
+        const folder = byId.get(value);
+        if (folder) addFolderCard(folder);
+      }, 0);
     },
   });
   pickerSelect.on("blur", closeFolderPicker);

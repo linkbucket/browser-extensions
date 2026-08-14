@@ -275,7 +275,7 @@ form input:focus {
 .ts-wrapper.single .ts-control {
   display: flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 42px;
   padding: 5px 36px 5px 12px;
   font-size: var(--fs-input);
   background: #fff;
@@ -414,7 +414,10 @@ form:not([style*="display:none"]) {
   align-items: center;
 }
 
-.ts-wrapper.multi .ts-control > input {
+/* Both modes: the control's inner search input must not inherit the
+   generic form-input chrome (44px height, padding), or the control
+   puffs up around it */
+.ts-wrapper .ts-control > input {
   height: auto !important;
   padding: 0;
   margin: 0;
