@@ -71,6 +71,7 @@ function removeFolderCard(folderId) {
   entry.tagSelect?.destroy();
   entry.card.remove();
   cards.delete(folderId);
+  closeFolderPicker(); // the removed folder is addable again
   onChange?.();
 }
 
@@ -113,7 +114,9 @@ async function openFolderPicker() {
   );
 
   if (folders.length === 0) {
-    $.addButton.disabled = false;
+    // Nothing to offer (no folders, all placed, or the fetch failed) —
+    // say so instead of a button that silently does nothing.
+    $.addButton.textContent = "No folders to add";
     return;
   }
 
@@ -145,5 +148,6 @@ function closeFolderPicker() {
 
   $.picker.style.display = "none";
   $.addButton.style.display = "";
+  $.addButton.textContent = "+ Also add to a shared folder";
   $.addButton.disabled = false;
 }
