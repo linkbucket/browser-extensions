@@ -67,7 +67,7 @@ npm run build
 │   ├── api.js              # API fetch wrapper and URL lookup
 │   ├── storage.js          # browser.storage.local wrapper
 │   ├── tags.js             # Tom Select tag controls (factory + My Links instance)
-│   ├── placements.js       # Folder destinations + per-folder tag rows
+│   ├── placements.js       # Folder placement cards (add, remove, hydrate)
 │   └── utils.js            # Pure helpers (URL validation, tag normalization)
 ├── tests/                  # Unit tests
 ├── assets/                 # Icons, images, bundled fonts

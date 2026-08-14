@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.5.0]
 
-- Save links into shared folders: pick destinations first, then tag each folder in its own scoped row; reopening a saved link pre-checks its folders for editing or removal
+- Save links into shared folders with per-folder tags (placement cards); reopening a saved link shows and edits its existing placements
 - Show the Linkbucket wordmark in the popup header
 
 ## [0.4.2]

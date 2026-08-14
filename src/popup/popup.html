@@ -66,39 +66,12 @@
         required
       />
 
-      <!-- Step 1: where the link goes. My Links is always saved; each
-           checked folder gets its own tag row below. -->
-      <label class="step-label">1 · Where does it go?</label>
-      <div id="destinations">
-        <label class="destination">
-          <input type="checkbox" checked disabled />
-          <span class="destination__name">My Links</span>
-          <span class="destination__meta">private · always saved</span>
-        </label>
-        <div id="folder-list"></div>
-        <input
-          type="search"
-          id="folderSearch"
-          placeholder="Search folders…"
-          autocomplete="off"
-          style="display: none"
-        />
-      </div>
-
-      <template id="destination-template">
-        <label class="destination">
-          <input type="checkbox" />
-          <span class="destination__name"></span>
-          <span class="destination__meta"></span>
-        </label>
-      </template>
-
-      <!-- Step 2: one tag row per destination, each scoped to its folder -->
-      <label class="step-label">
-        2 · Tags <span class="step-label__note">per folder, kept separate</span>
-      </label>
-      <div class="tag-row">
-        <span class="tag-row__label">My Links</span>
+      <!-- Placement cards: My Links plus one card per folder -->
+      <section class="placement-card" id="my-links-card">
+        <div class="placement-card__header">
+          <span class="placement-pill placement-pill--my-links">My Links</span>
+          <span class="placement-card__meta">private · always saved here</span>
+        </div>
         <select
           id="tags"
           name="tags[]"
@@ -106,19 +79,37 @@
           placeholder="Add tags…"
           autocomplete="off"
         ></select>
-      </div>
-      <div id="folder-tag-rows"></div>
+      </section>
 
-      <template id="tag-row-template">
-        <div class="tag-row">
-          <span class="tag-row__label"></span>
+      <div id="folder-cards"></div>
+
+      <template id="folder-card-template">
+        <section class="placement-card placement-card--folder">
+          <div class="placement-card__header">
+            <span class="placement-pill placement-pill--folder"></span>
+            <span class="placement-card__meta"></span>
+            <button
+              type="button"
+              class="placement-card__remove"
+              title="Remove from this folder"
+            >
+              ✕
+            </button>
+          </div>
           <select multiple placeholder="Add tags…" autocomplete="off"></select>
-        </div>
+        </section>
       </template>
+
+      <div id="add-folder-row">
+        <button type="button" id="addFolder">
+          + Also add to a shared folder
+        </button>
+        <select id="folderPicker" style="display: none"></select>
+      </div>
 
       <div class="actions">
         <button id="resetKeys" type="button">Change API Keys</button>
-        <button type="submit">Save link</button>
+        <button id="saveButton" type="submit">Save link</button>
       </div>
     </form>
 

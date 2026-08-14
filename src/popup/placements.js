@@ -4,81 +4,51 @@ import {
   normalizeFolders,
   folderLabel,
   folderMeta,
-  filterFolders,
   buildPlacementsPayload,
 } from "./utils.js";
 
-// Show the folder search box only when the list is long enough to need it
-const SEARCH_THRESHOLD = 6;
-
-// Checked destinations, keyed by folder id. Each entry owns that
-// folder's tag row (label + Tom Select instance).
-const checked = new Map();
-
-let allFolders = [];
+// One card per folder placement, keyed by folder id
+const cards = new Map();
 
 const $ = {
-  folderList: null,
-  destinationTemplate: null,
-  folderTagRows: null,
-  tagRowTemplate: null,
-  search: null,
+  stack: null,
+  template: null,
+  addButton: null,
+  picker: null,
 };
 
+let onChange = null;
+
 export function initPlacements({
-  folderList,
-  destinationTemplate,
-  folderTagRows,
-  tagRowTemplate,
-  search,
+  stack,
+  template,
+  addButton,
+  picker,
+  changed,
 }) {
-  $.folderList = folderList;
-  $.destinationTemplate = destinationTemplate;
-  $.folderTagRows = folderTagRows;
-  $.tagRowTemplate = tagRowTemplate;
-  $.search = search;
+  $.stack = stack;
+  $.template = template;
+  $.addButton = addButton;
+  $.picker = picker;
+  onChange = changed;
 
-  $.search.addEventListener("input", renderFolderList);
+  $.addButton.addEventListener("click", openFolderPicker);
+  $.picker.addEventListener("change", handlePickerChange);
+  // Closing the native dropdown without choosing leaves the picker focused;
+  // restore the add button on blur so the row never looks stuck.
+  $.picker.addEventListener("blur", closeFolderPicker);
 }
 
-export async function loadFolders() {
-  allFolders = normalizeFolders(await fetchFolders());
-  $.search.style.display = allFolders.length > SEARCH_THRESHOLD ? "" : "none";
-  renderFolderList();
-}
+export function addFolderCard(folder, tags = []) {
+  if (cards.has(folder.id)) return;
 
-function renderFolderList() {
-  $.folderList.replaceChildren(
-    ...filterFolders(allFolders, $.search.value).map((folder) => {
-      const fragment = $.destinationTemplate.content.cloneNode(true);
-      const row = fragment.querySelector(".destination");
-      row.querySelector(".destination__name").textContent = folderLabel(folder);
-      row.querySelector(".destination__meta").textContent = folderMeta(folder);
+  const fragment = $.template.content.cloneNode(true);
+  const card = fragment.querySelector(".placement-card");
+  card.querySelector(".placement-pill").textContent = folderLabel(folder);
+  card.querySelector(".placement-card__meta").textContent = folderMeta(folder);
 
-      const checkbox = row.querySelector("input");
-      checkbox.checked = checked.has(folder.id);
-      checkbox.addEventListener("change", () => {
-        if (checkbox.checked) {
-          addTagRow(folder);
-        } else {
-          removeTagRow(folder.id);
-        }
-      });
-
-      return fragment;
-    }),
-  );
-}
-
-function addTagRow(folder, tags = []) {
-  if (checked.has(folder.id)) return;
-
-  const fragment = $.tagRowTemplate.content.cloneNode(true);
-  const row = fragment.querySelector(".tag-row");
-  row.querySelector(".tag-row__label").textContent = folder.title;
-
-  const select = row.querySelector("select");
-  $.folderTagRows.appendChild(fragment);
+  const select = card.querySelector("select");
+  $.stack.appendChild(fragment);
 
   const tagSelect = createTagSelect(
     select,
@@ -86,51 +56,98 @@ function addTagRow(folder, tags = []) {
   );
   tagSelect?.setValues(tags);
 
-  checked.set(folder.id, { folder, row, tagSelect });
+  card
+    .querySelector(".placement-card__remove")
+    .addEventListener("click", () => removeFolderCard(folder.id));
+
+  cards.set(folder.id, { folder, card, tagSelect });
+  onChange?.();
 }
 
-function removeTagRow(folderId) {
-  const entry = checked.get(folderId);
+function removeFolderCard(folderId) {
+  const entry = cards.get(folderId);
   if (!entry) return;
 
   entry.tagSelect?.destroy();
-  entry.row.remove();
-  checked.delete(folderId);
+  entry.card.remove();
+  cards.delete(folderId);
+  closeFolderPicker(); // the removed folder is addable again
+  onChange?.();
 }
 
 export function hydratePlacements(placements) {
   destroyPlacements();
   (placements || []).forEach((placement) => {
     const [folder] = normalizeFolders([placement.folder]);
-    if (!folder) return;
-
-    // A hydrated folder can be missing from the list (e.g. beyond the
-    // API's cap) - add it so its checkbox exists to uncheck.
-    if (!allFolders.some((f) => f.id === folder.id)) {
-      allFolders.push(folder);
-    }
-    addTagRow(folder, placement.tags || []);
+    if (folder) addFolderCard(folder, placement.tags || []);
   });
-  renderFolderList();
 }
 
 export function getPlacements() {
   return buildPlacementsPayload(
-    Array.from(checked.values(), ({ folder, tagSelect }) => ({
+    Array.from(cards.values(), ({ folder, tagSelect }) => ({
       folderId: folder.id,
       values: tagSelect?.getValues() ?? [],
     })),
   );
 }
 
+export function placementCount() {
+  return cards.size;
+}
+
 export function destroyPlacements() {
-  checked.forEach(({ tagSelect, row }) => {
+  cards.forEach(({ card, tagSelect }) => {
     tagSelect?.destroy();
-    row.remove();
+    card.remove();
   });
-  checked.clear();
-  if ($.search) {
-    $.search.value = "";
-    renderFolderList();
+  cards.clear();
+  closeFolderPicker();
+  onChange?.();
+}
+
+async function openFolderPicker() {
+  $.addButton.disabled = true;
+
+  const folders = normalizeFolders(await fetchFolders()).filter(
+    (folder) => !cards.has(folder.id),
+  );
+
+  if (folders.length === 0) {
+    // Nothing to offer (no folders, all placed, or the fetch failed) —
+    // say so instead of a button that silently does nothing.
+    $.addButton.textContent = "No folders to add";
+    return;
   }
+
+  $.picker.replaceChildren(
+    new Option("Choose a folder…", "", true, true),
+    ...folders.map((folder) => {
+      const option = new Option(folderLabel(folder), folder.id);
+      option.dataset.folder = JSON.stringify(folder);
+      return option;
+    }),
+  );
+  $.picker.options[0].disabled = true;
+
+  $.addButton.style.display = "none";
+  $.picker.style.display = "";
+  $.picker.focus();
+}
+
+function handlePickerChange() {
+  const option = $.picker.selectedOptions[0];
+  if (option?.dataset.folder) {
+    addFolderCard(JSON.parse(option.dataset.folder));
+  }
+  closeFolderPicker();
+}
+
+function closeFolderPicker() {
+  if (!$.picker) return;
+
+  $.picker.style.display = "none";
+  $.addButton.style.display = "";
+  $.addButton.textContent = "+ Also add to a shared folder";
+  $.addButton.disabled = false;
 }
