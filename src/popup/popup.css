@@ -329,11 +329,14 @@ button[type="submit"]:disabled {
   outline: none;
 }
 
-/* Result area */
+/* Result area: transient save feedback only; takes no space when idle */
 #result {
   margin-top: 14px;
   font-size: 13px;
-  min-height: 17px;
+}
+
+#result:empty {
+  display: none;
 }
 
 /* Subtle fade-in when forms are revealed */

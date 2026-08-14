@@ -86,7 +86,7 @@ async function showUrlForm() {
       hydratePlacements(record.placements);
       setMyLinks(record.my_links !== false);
 
-      showResult("Already in your bucket. Saving updates it.");
+      showResult("");
     } else {
       showResult(""); // clear any old message
     }
