@@ -15,8 +15,8 @@
 }
 
 :root {
-  --fs-base: 14px;
-  --fs-input: 13px;
+  --fs-base: 15px;
+  --fs-input: 14px;
   --color-bg: #f4f1ea;
   --color-ink: #26205e;
   --color-muted: #8a857c;
@@ -28,10 +28,10 @@
   --radius-input: 10px;
   --radius-card: 14px;
   --radius-button: 25px;
-  --space-form-gap: 10px;
-  --space-label-top: 14px;
-  --space-label-bottom: 5px;
-  --space-actions-top: 14px;
+  --space-form-gap: 12px;
+  --space-label-top: 18px;
+  --space-label-bottom: 6px;
+  --space-actions-top: 18px;
 }
 
 /* Reset / base */
@@ -48,8 +48,8 @@ textarea {
 }
 
 body {
-  width: 400px;
-  padding: 0 20px 16px;
+  width: 420px;
+  padding: 0 22px 20px;
   margin: 0;
   background: var(--color-bg);
   color: var(--color-ink);
@@ -61,17 +61,17 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin: 16px 0 12px;
+  gap: 10px;
+  margin: 18px 0 16px;
 }
 
 .brand__mark {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
 }
 
 .brand__wordmark {
-  height: 15px;
+  height: 16px;
 }
 
 /* Forms */
@@ -83,7 +83,7 @@ form {
 /* Space between each label+input pair is handled by label top margin */
 form label {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   margin: var(--space-label-top) 0 var(--space-label-bottom);
   line-height: 1.1;
@@ -97,10 +97,10 @@ form label:first-of-type {
 form input {
   width: 100%;
   max-width: 100%;
-  height: 40px;
+  height: 44px;
   border-radius: var(--radius-input);
   border: 1.5px solid var(--color-border);
-  padding: 0 10px;
+  padding: 0 12px;
   background: #fff;
   font-size: var(--fs-input);
   line-height: 1.2;
@@ -124,8 +124,8 @@ form input:focus {
 .pageinfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 9px 12px;
+  gap: 3px;
+  padding: 11px 14px;
   background: #fff;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-input);
@@ -133,7 +133,7 @@ form input:focus {
 
 .pageinfo__title {
   overflow: hidden;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -141,7 +141,7 @@ form input:focus {
 
 .pageinfo__url {
   overflow: hidden;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -149,7 +149,7 @@ form input:focus {
 
 /* Placement cards (My Links + one per folder) */
 .placement-card {
-  padding: 14px;
+  padding: 16px;
   margin-top: var(--space-label-top);
   background: #fff;
   border: 1.5px solid var(--color-border);
@@ -182,24 +182,24 @@ form input:focus {
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-bottom: 9px;
+  margin-bottom: 11px;
 }
 
 .placement-card__name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
 }
 
 .placement-card__check {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
   margin-left: auto;
   accent-color: var(--color-accent);
 }
 
 .placement-pill {
-  padding: 3px 12px;
-  font-size: 12px;
+  padding: 4px 13px;
+  font-size: 13px;
   font-weight: bold;
   border-radius: 99px;
 }
@@ -211,7 +211,7 @@ form input:focus {
 
 .placement-card__meta {
   overflow: hidden;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -220,7 +220,7 @@ form input:focus {
 .placement-card__remove {
   padding: 2px 6px;
   margin-left: auto;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-muted);
   cursor: pointer;
   background: none;
@@ -240,8 +240,8 @@ form input:focus {
 
 #addFolder {
   width: 100%;
-  padding: 9px 14px;
-  font-size: 13px;
+  padding: 11px 14px;
+  font-size: 14px;
   color: #6f6a60;
   cursor: pointer;
   background: none;
@@ -263,8 +263,8 @@ form input:focus {
 
 #folderPicker {
   width: 100%;
-  height: 40px;
-  padding: 0 10px;
+  height: 44px;
+  padding: 0 12px;
   background: #fff;
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-input);
@@ -290,7 +290,7 @@ form input:focus {
 
 /* Primary submit button */
 button[type="submit"] {
-  padding: 10px 28px;
+  padding: 11px 32px;
   border: none;
   border-radius: var(--radius-button);
   background: var(--color-accent);
@@ -317,7 +317,7 @@ button[type="submit"]:disabled {
   border: none;
   background: none;
   padding: 4px 0;
-  font-size: 13px;
+  font-size: 14px;
   text-decoration: underline;
   cursor: pointer;
   line-height: 1.2;
@@ -331,9 +331,9 @@ button[type="submit"]:disabled {
 
 /* Result area */
 #result {
-  margin-top: 12px;
-  font-size: 12px;
-  min-height: 16px;
+  margin-top: 14px;
+  font-size: 13px;
+  min-height: 17px;
 }
 
 /* Subtle fade-in when forms are revealed */
@@ -367,8 +367,8 @@ form:not([style*="display:none"]) {
 }
 
 .ts-wrapper.multi .ts-control {
-  padding: 4px 10px;
-  min-height: 38px;
+  padding: 5px 12px;
+  min-height: 42px;
   border-radius: var(--radius-input);
   border: 1.5px solid var(--color-border);
   background: #fff;
@@ -395,9 +395,9 @@ form:not([style*="display:none"]) {
 }
 
 .ts-wrapper.multi.has-items .ts-control {
-  gap: 5px;
-  padding: 6px 10px;
-  min-height: 38px;
+  gap: 6px;
+  padding: 7px 12px;
+  min-height: 42px;
 }
 
 /* Tag pills */
@@ -407,8 +407,8 @@ form:not([style*="display:none"]) {
   border-radius: 99px;
   color: inherit;
   margin: 0;
-  padding: 3px 10px;
-  font-size: 12px;
+  padding: 3px 11px;
+  font-size: 13px;
 }
 
 .ts-wrapper.multi .ts-control > div.active {
@@ -446,14 +446,14 @@ form:not([style*="display:none"]) {
 }
 
 .ts-dropdown-content {
-  height: 180px;
+  height: 190px;
   overflow-y: auto;
 }
 
 .ts-dropdown .option,
 .ts-dropdown .create,
 .ts-dropdown .no-results {
-  padding: 8px 10px;
+  padding: 9px 12px;
 }
 
 .ts-dropdown .active {
