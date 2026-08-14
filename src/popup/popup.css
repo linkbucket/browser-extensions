@@ -441,19 +441,17 @@ form:not([style*="display:none"]) {
   box-shadow: 0 0 0 2px rgba(38, 32, 94, 0.12);
 }
 
-/* Tom Select dropdown (opens upward) */
+/* Tom Select dropdown (opens downward; sized per open in tags.js) */
 .ts-dropdown {
   border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-input) var(--radius-input) 0 0;
-  border-bottom: 0;
-  box-shadow: 0 -4px 12px hsl(0deg 0% 0% / 0.12);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-input) var(--radius-input);
+  box-shadow: 0 6px 14px hsl(0deg 0% 0% / 0.14);
   overflow: hidden;
-  top: auto;
-  bottom: 100%;
 }
 
 .ts-dropdown-content {
-  height: 190px;
+  max-height: 114px;
   overflow-y: auto;
 }
 

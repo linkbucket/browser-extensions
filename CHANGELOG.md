@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Save links into folders with per-folder tags (placement cards); reopening a saved link shows and edits its existing placements
 - My Links is optional: a checkbox on its card enables folder-only saves
 - Show the page title with the URL beneath it instead of a raw URL field
+- Tag suggestions open downward and size themselves to the room below the field
 - Compact restyle following the design explorations: smaller fields and spacing, and a bucket mark + wordmark header replacing the large illustration
 
 ## [0.4.2]
