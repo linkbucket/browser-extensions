@@ -60,19 +60,50 @@
         required
       />
 
-      <!-- New: Tags field -->
-      <label>Tags</label>
-      <select
-        id="tags"
-        name="tags[]"
-        multiple
-        placeholder="Add tags…"
-        autocomplete="off"
-      ></select>
+      <!-- Placement cards: My Links plus one card per folder -->
+      <section class="placement-card" id="my-links-card">
+        <div class="placement-card__header">
+          <span class="placement-pill placement-pill--my-links">My Links</span>
+          <span class="placement-card__meta">private · always saved here</span>
+        </div>
+        <select
+          id="tags"
+          name="tags[]"
+          multiple
+          placeholder="Add tags…"
+          autocomplete="off"
+        ></select>
+      </section>
+
+      <div id="folder-cards"></div>
+
+      <template id="folder-card-template">
+        <section class="placement-card placement-card--folder">
+          <div class="placement-card__header">
+            <span class="placement-pill placement-pill--folder"></span>
+            <span class="placement-card__meta"></span>
+            <button
+              type="button"
+              class="placement-card__remove"
+              title="Remove from this folder"
+            >
+              ✕
+            </button>
+          </div>
+          <select multiple placeholder="Add tags…" autocomplete="off"></select>
+        </section>
+      </template>
+
+      <div id="add-folder-row">
+        <button type="button" id="addFolder">
+          + Also add to a shared folder
+        </button>
+        <select id="folderPicker" style="display: none"></select>
+      </div>
 
       <div class="actions">
         <button id="resetKeys" type="button">Change API Keys</button>
-        <button type="submit">Save link</button>
+        <button id="saveButton" type="submit">Save link</button>
       </div>
     </form>
 

@@ -1,16 +1,12 @@
 import { normalizeTags, splitSelectedTags } from "./utils.js";
 
-// Module-level Tom Select instance
-let tagSelect = null;
+// Creates a Tom Select tag control on selectElement. `load` is called with
+// the typed query and must resolve to a tag options array ({id, title}).
+// Returns a handle, or null when Tom Select is unavailable.
+export function createTagSelect(selectElement, load) {
+  if (!selectElement || !window.TomSelect) return null;
 
-export async function initTagsSelect(selectElement, apiFetchFn) {
-  if (!selectElement || !window.TomSelect) return;
-
-  // Clean up previous instance
-  tagSelect?.destroy();
-  tagSelect = null;
-
-  tagSelect = new window.TomSelect(selectElement, {
+  const instance = new window.TomSelect(selectElement, {
     plugins: {
       remove_button: {
         title: "Remove this item",
@@ -46,21 +42,7 @@ export async function initTagsSelect(selectElement, apiFetchFn) {
 
     load: async (query, callback) => {
       try {
-        const q = encodeURIComponent(query || "");
-        const response = await apiFetchFn(`/tags?query=${q}`);
-        if (!response.ok) {
-          console.error(
-            "Failed to load tags:",
-            response.status,
-            response.statusText,
-          );
-          callback();
-          return;
-        }
-
-        const json = await response.json();
-        const options = normalizeTags(json);
-        callback(options);
+        callback(await load(query || ""));
       } catch (error) {
         console.error("Failed to load tags:", error);
         callback(); // fail silently so user can still create new tags
@@ -71,30 +53,69 @@ export async function initTagsSelect(selectElement, apiFetchFn) {
       title: input,
     }),
   });
+
+  return {
+    getValues() {
+      return instance.getValue();
+    },
+    setValues(tags) {
+      const tagIds = tags.map((t) => String(t.id));
+
+      // Make sure options exist in Tom Select before setting value
+      tags.forEach((t) => {
+        const id = String(t.id);
+        if (!instance.options[id]) {
+          instance.addOption({ id, title: t.title });
+        }
+      });
+
+      instance.setValue(tagIds, true);
+    },
+    blur() {
+      instance.blur();
+    },
+    destroy() {
+      instance.destroy();
+    },
+  };
+}
+
+// Loader for a tag endpoint returning [{id, title}]: /tags for the user's
+// own tags, /folders/:id/tags for a folder's.
+export function tagLoader(apiFetchFn, path) {
+  return async (query) => {
+    const q = encodeURIComponent(query);
+    const response = await apiFetchFn(`${path}?query=${q}`);
+    if (!response.ok) {
+      console.error(
+        "Failed to load tags:",
+        response.status,
+        response.statusText,
+      );
+      return undefined;
+    }
+    return normalizeTags(await response.json());
+  };
+}
+
+// The My Links tag control (module-level singleton, one per popup)
+let tagSelect = null;
+
+export async function initTagsSelect(selectElement, apiFetchFn) {
+  tagSelect?.destroy();
+  tagSelect = createTagSelect(selectElement, tagLoader(apiFetchFn, "/tags"));
 }
 
 export function getSelectedTags(selectElement) {
   const values =
-    tagSelect?.getValue() ??
+    tagSelect?.getValues() ??
     Array.from(selectElement?.selectedOptions || []).map((o) => o.value);
 
   return splitSelectedTags(values);
 }
 
 export function setTagValues(tags) {
-  if (!tagSelect) return;
-
-  const tagIds = tags.map((t) => String(t.id));
-
-  // Make sure options exist in Tom Select before setting value
-  tags.forEach((t) => {
-    const id = String(t.id);
-    if (!tagSelect.options[id]) {
-      tagSelect.addOption({ id, title: t.title });
-    }
-  });
-
-  tagSelect.setValue(tagIds, true);
+  tagSelect?.setValues(tags);
 }
 
 export function blurTagSelect() {

@@ -71,7 +71,8 @@ Please ensure your changes pass both checks before opening a pull request.
 │   ├── popup.js            # Entry point — DOM, UI state, event handlers
 │   ├── api.js              # API fetch wrapper and URL lookup
 │   ├── storage.js          # browser.storage.local wrapper
-│   ├── tags.js             # Tom Select lifecycle (init, get, set, destroy)
+│   ├── tags.js             # Tom Select tag controls (factory + My Links instance)
+│   ├── placements.js       # Folder placement cards (add, remove, hydrate)
 │   └── utils.js            # Pure helpers (URL validation, tag normalization)
 ├── tests/                  # Unit tests
 ├── assets/                 # Icons, images, fonts

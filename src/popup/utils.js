@@ -30,6 +30,51 @@ export function normalizeTags(json) {
     .filter((t) => t.id && t.title); // Only include valid tags
 }
 
+// Normalize backend folder response - expects array of
+// {id, title, shared, owner_name, member_count}
+export function normalizeFolders(json) {
+  const list = Array.isArray(json) ? json : [];
+
+  return list
+    .filter((f) => f && typeof f === "object")
+    .map((f) => ({
+      id: String(f.id ?? ""),
+      title: String(f.title ?? "Untitled"),
+      shared: Boolean(f.shared),
+      owner_name: String(f.owner_name ?? ""),
+      member_count: Number(f.member_count) || 1,
+    }))
+    .filter((f) => f.id);
+}
+
+// "Name (Owner's)" for folders shared with the user, matching the web app's
+// folder picker labels
+export function folderLabel(folder) {
+  return folder.shared
+    ? `${folder.title} (${folder.owner_name}'s)`
+    : folder.title;
+}
+
+export function folderMeta(folder) {
+  return folder.member_count > 1
+    ? `shared · ${folder.member_count} people`
+    : "private";
+}
+
+// Build the API placements payload from per-card selections:
+// [{folderId, values}] where values are a tag select's raw values
+// (existing folder_tag ids and "new:name" entries)
+export function buildPlacementsPayload(cardSelections) {
+  return cardSelections.map(({ folderId, values }) => {
+    const { user_tag_ids, tag_names } = splitSelectedTags(values);
+    return {
+      folder_id: folderId,
+      folder_tag_ids: user_tag_ids,
+      tag_names,
+    };
+  });
+}
+
 // Split selected tag values into existing IDs and new tag names
 export function splitSelectedTags(values) {
   const selected = Array.isArray(values) ? values : [values];

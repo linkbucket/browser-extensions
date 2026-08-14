@@ -26,6 +26,21 @@ export async function apiFetch(path, options = {}) {
   return response;
 }
 
+export async function fetchFolders() {
+  try {
+    const response = await apiFetch("/folders");
+    if (!response.ok) {
+      console.error("Folders failed", response.status, response.statusText);
+      return [];
+    }
+    // Expected shape: [{id, title, shared, owner_name, member_count}, ...]
+    return await response.json();
+  } catch (error) {
+    console.error("Folders error", error);
+    return [];
+  }
+}
+
 export async function lookupUrl(url) {
   try {
     const q = encodeURIComponent(url);

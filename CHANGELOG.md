@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.0]
+
+- Save links into shared folders with per-folder tags (placement cards); reopening a saved link shows and edits its existing placements
+
 ## [0.4.2]
 
 - Replace webextension-polyfill with a native chrome/browser shim (smaller bundle)

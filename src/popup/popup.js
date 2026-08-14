@@ -8,6 +8,13 @@ import {
   blurTagSelect,
   destroyTagSelect,
 } from "./tags.js";
+import {
+  initPlacements,
+  hydratePlacements,
+  getPlacements,
+  placementCount,
+  destroyPlacements,
+} from "./placements.js";
 
 // Get active tab URL
 async function getActiveTabUrl() {
@@ -32,6 +39,7 @@ const $ = {
   resultDiv: null,
   resetKeysBtn: null,
   tagsSelect: null,
+  saveButton: null,
   accessKeyId: null,
   secretKey: null,
 };
@@ -54,6 +62,7 @@ async function showUrlForm() {
 
   // Reset previous lookup state
   existingUrlRecord = null;
+  destroyPlacements();
 
   // If we have a sensible URL, try to see if it already exists
   if (tabUrl && isValidUrl(tabUrl)) {
@@ -65,6 +74,9 @@ async function showUrlForm() {
       if (Array.isArray(record.tags)) {
         setTagValues(record.tags);
       }
+
+      // One card per folder this link already lives in
+      hydratePlacements(record.placements);
 
       showResult("");
     } else {
@@ -120,17 +132,21 @@ async function handleUrlSubmit(e) {
 
   try {
     const { user_tag_ids, tag_names } = getSelectedTags($.tagsSelect);
+    const placements = getPlacements();
 
     let response;
 
     if (existingUrlRecord && existingUrlRecord.id) {
-      // Update existing link
+      // Update existing link. The placements array is the full desired
+      // state: a card the user removed means the server removes that
+      // folder placement.
       response = await apiFetch(`/user_bookmarks/${existingUrlRecord.id}`, {
         method: "PATCH",
         body: JSON.stringify({
-          url: {
+          user_bookmark: {
             user_tag_ids,
             tag_names,
+            placements,
           },
         }),
       });
@@ -143,6 +159,7 @@ async function handleUrlSubmit(e) {
             url,
             user_tag_ids,
             tag_names,
+            placements,
           },
         }),
       });
@@ -165,10 +182,19 @@ async function handleUrlSubmit(e) {
   }
 }
 
+// "Save link" for a plain save; "Save N placements" once folder cards
+// exist (My Links counts as one placement)
+function updateSaveButton() {
+  const count = 1 + placementCount();
+  $.saveButton.textContent =
+    count > 1 ? `Save ${count} placements` : "Save link";
+}
+
 async function handleResetKeys() {
   await storage.remove(["accessKeyId", "secretKey"]);
   existingUrlRecord = null;
   destroyTagSelect();
+  destroyPlacements();
 
   $.accessKeyId.value = "";
   $.secretKey.value = "";
@@ -186,8 +212,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   $.resultDiv = document.getElementById("result");
   $.resetKeysBtn = document.getElementById("resetKeys");
   $.tagsSelect = document.getElementById("tags");
+  $.saveButton = document.getElementById("saveButton");
   $.accessKeyId = document.getElementById("accessKeyId");
   $.secretKey = document.getElementById("secretKey");
+
+  initPlacements({
+    stack: document.getElementById("folder-cards"),
+    template: document.getElementById("folder-card-template"),
+    addButton: document.getElementById("addFolder"),
+    picker: document.getElementById("folderPicker"),
+    changed: updateSaveButton,
+  });
 
   // Determine initial view
   const { accessKeyId, secretKey } = await storage.get([
