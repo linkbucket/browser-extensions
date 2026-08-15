@@ -61,6 +61,23 @@ export function folderMeta(folder) {
     : "private";
 }
 
+// "Saved today" / "Saved yesterday" / "Saved N days ago", falling back
+// to the date for older saves and to plain "Saved" without a usable date
+export function savedAgo(isoDate, now = new Date()) {
+  const saved = new Date(isoDate ?? "");
+  if (Number.isNaN(saved.getTime())) return "Saved";
+
+  const days = Math.floor((now - saved) / 86400000);
+  if (days <= 0) return "Saved today";
+  if (days === 1) return "Saved yesterday";
+  if (days < 30) return `Saved ${days} days ago`;
+  return `Saved ${saved.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })}`;
+}
+
 // Build the API placements payload from per-card selections:
 // [{folderId, values}] where values are a tag select's raw values
 // (existing folder_tag ids and "new:name" entries)

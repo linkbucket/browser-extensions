@@ -6,6 +6,7 @@ import {
   normalizeFolders,
   folderLabel,
   folderMeta,
+  savedAgo,
   buildPlacementsPayload,
 } from "../src/popup/utils.js";
 
@@ -149,10 +150,12 @@ describe("splitSelectedTags", () => {
   });
 
   it("skips empty and falsy values", () => {
-    expect(splitSelectedTags(["id-1", "", null, undefined, "new:tag"])).toEqual({
-      user_tag_ids: ["id-1"],
-      tag_names: ["tag"],
-    });
+    expect(splitSelectedTags(["id-1", "", null, undefined, "new:tag"])).toEqual(
+      {
+        user_tag_ids: ["id-1"],
+        tag_names: ["tag"],
+      },
+    );
   });
 
   it("returns empty arrays for empty input", () => {
@@ -257,5 +260,30 @@ describe("buildPlacementsPayload", () => {
 
   it("returns an empty array for no cards", () => {
     expect(buildPlacementsPayload([])).toEqual([]);
+  });
+});
+
+describe("savedAgo", () => {
+  const now = new Date("2026-08-15T12:00:00Z");
+
+  it("says today for a same-day save", () => {
+    expect(savedAgo("2026-08-15T08:00:00Z", now)).toBe("Saved today");
+  });
+
+  it("says yesterday", () => {
+    expect(savedAgo("2026-08-14T08:00:00Z", now)).toBe("Saved yesterday");
+  });
+
+  it("counts recent days", () => {
+    expect(savedAgo("2026-08-12T08:00:00Z", now)).toBe("Saved 3 days ago");
+  });
+
+  it("falls back to the date for old saves", () => {
+    expect(savedAgo("2026-01-10T08:00:00Z", now)).toMatch(/^Saved .*2026$/);
+  });
+
+  it("degrades to plain Saved without a usable date", () => {
+    expect(savedAgo(null, now)).toBe("Saved");
+    expect(savedAgo("not-a-date", now)).toBe("Saved");
   });
 });

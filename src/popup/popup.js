@@ -1,4 +1,4 @@
-import { isValidUrl } from "./utils.js";
+import { isValidUrl, savedAgo } from "./utils.js";
 import { storage } from "./storage.js";
 import { apiFetch, lookupUrl } from "./api.js";
 import {
@@ -37,6 +37,8 @@ const $ = {
   urlForm: null,
   pageTitle: null,
   pageUrl: null,
+  savedStatus: null,
+  savedStatusText: null,
   resultDiv: null,
   resetKeysBtn: null,
   tagsSelect: null,
@@ -70,6 +72,7 @@ async function showUrlForm() {
   existingUrlRecord = null;
   destroyPlacements();
   setMyLinks(true);
+  showSavedStatus(null);
 
   // If we have a sensible URL, try to see if it already exists
   if (currentUrl && isValidUrl(currentUrl)) {
@@ -85,6 +88,7 @@ async function showUrlForm() {
       // One card per folder this link already lives in
       hydratePlacements(record.placements);
       setMyLinks(record.my_links !== false);
+      showSavedStatus(record);
 
       showResult("");
     } else {
@@ -111,6 +115,14 @@ function showPageInfo(title, url) {
   $.pageUrl.textContent = url;
   // With no title the URL takes its place; don't repeat it below
   $.pageUrl.style.display = title ? "" : "none";
+}
+
+// The already-saved header ("Saved 3 days ago") - pass null for a new link
+function showSavedStatus(record) {
+  const saved = Boolean(record?.id);
+  $.savedStatus.style.display = saved ? "" : "none";
+  $.savedStatusText.textContent = saved ? savedAgo(record.saved_at) : "";
+  $.saveButton.textContent = saved ? "Save changes" : "Save";
 }
 
 function setMyLinks(checked) {
@@ -242,6 +254,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   $.urlForm = document.getElementById("url-form");
   $.pageTitle = document.getElementById("pageTitle");
   $.pageUrl = document.getElementById("pageUrl");
+  $.savedStatus = document.getElementById("savedStatus");
+  $.savedStatusText = document.getElementById("savedStatusText");
   $.resultDiv = document.getElementById("result");
   $.resetKeysBtn = document.getElementById("resetKeys");
   $.tagsSelect = document.getElementById("tags");

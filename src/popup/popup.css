@@ -120,6 +120,31 @@ form input:focus {
   box-shadow: 0 0 0 2px rgba(38, 32, 94, 0.12);
 }
 
+/* Already-saved header: status is the headline, not a footnote */
+.saved-status {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.saved-status__check {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  background: #d6f0c2;
+  border-radius: 50%;
+}
+
+.saved-status__text {
+  font-size: 15px;
+  font-weight: bold;
+}
+
 /* The page being saved: tab title with the URL beneath */
 .pageinfo {
   display: flex;
