@@ -48,6 +48,9 @@ textarea {
 }
 
 body {
+  /* flow-root contains child margins; escaped to the root they'd sit
+     outside the offsetHeight that restore-height.js measures (#84) */
+  display: flow-root;
   width: 420px;
   padding: 0 22px 20px;
   margin: 0;
