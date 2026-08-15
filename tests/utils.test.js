@@ -279,6 +279,14 @@ describe("savedAgo", () => {
     expect(savedAgo("2026-08-12T08:00:00Z", now)).toBe("Saved 3 days ago");
   });
 
+  it("uses calendar days at midnight boundaries", () => {
+    const justAfterMidnight = new Date(2026, 7, 15, 0, 5);
+    const justBeforeMidnight = new Date(2026, 7, 14, 23, 55);
+    expect(savedAgo(justBeforeMidnight.toISOString(), justAfterMidnight)).toBe(
+      "Saved yesterday",
+    );
+  });
+
   it("falls back to the date for old saves", () => {
     expect(savedAgo("2026-01-10T08:00:00Z", now)).toMatch(/^Saved .*2026$/);
   });

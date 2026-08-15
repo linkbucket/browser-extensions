@@ -79,7 +79,11 @@ export function savedAgo(isoDate, now = new Date()) {
   const saved = new Date(isoDate ?? "");
   if (Number.isNaN(saved.getTime())) return "Saved";
 
-  const days = Math.floor((now - saved) / 86400000);
+  // Calendar days, not 24h periods: a 23:55 save reads "yesterday" at
+  // 00:05, and the boundary follows the user's midnight across DST
+  const startOfDay = (d) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const days = Math.round((startOfDay(now) - startOfDay(saved)) / 86400000);
   if (days <= 0) return "Saved today";
   if (days === 1) return "Saved yesterday";
   if (days < 30) return `Saved ${days} days ago`;
