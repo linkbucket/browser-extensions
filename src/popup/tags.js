@@ -1,13 +1,15 @@
 import { normalizeTags, splitSelectedTags } from "./utils.js";
 
+export const DROPDOWN_ROW_PX = 38;
+
 // Fill the room between a control and the popup's bottom edge, quantized
 // to whole rows so the list never ends mid-option. The three-row floor is
 // what the tightest layout (My Links only, no folder cards) has room for.
 export function sizeDropdownToRoom(control, dropdown) {
   const room = window.innerHeight - control.getBoundingClientRect().bottom - 12;
-  const rows = Math.max(3, Math.floor(room / 38));
+  const rows = Math.max(3, Math.floor(room / DROPDOWN_ROW_PX));
   const content = dropdown.querySelector(".ts-dropdown-content");
-  if (content) content.style.maxHeight = `${rows * 38}px`;
+  if (content) content.style.maxHeight = `${rows * DROPDOWN_ROW_PX}px`;
 }
 
 // Creates a Tom Select tag control on selectElement. `load` is called with
@@ -31,7 +33,6 @@ export function createTagSelect(selectElement, load) {
     preload: false,
     loadThrottle: 300,
 
-    // Clear textbox and refresh options after adding an item
     onItemAdd: function () {
       this.setTextboxValue("");
       this.refreshOptions();
@@ -41,13 +42,10 @@ export function createTagSelect(selectElement, load) {
     // No leading/trailing hyphens, no consecutive hyphens
     createFilter: "^(?!-)(?!.*-$)(?!.*--)[0-9a-z-]+$",
 
-    // Allow selecting options with Tab key
     selectOnTab: true,
 
-    // Hide placeholder when items are selected
     hidePlaceholder: true,
 
-    // Don't prioritize adding new items over existing matches
     addPrecedence: false,
 
     onDropdownOpen(dropdown) {
@@ -75,7 +73,7 @@ export function createTagSelect(selectElement, load) {
     setValues(tags) {
       const tagIds = tags.map((t) => String(t.id));
 
-      // Make sure options exist in Tom Select before setting value
+      // setValue silently drops ids that have no registered option
       tags.forEach((t) => {
         const id = String(t.id);
         if (!instance.options[id]) {

@@ -16,7 +16,6 @@ import {
   destroyPlacements,
 } from "./placements.js";
 
-// Get the active tab (for its URL and title)
 async function getActiveTab() {
   const tabs = await browser.tabs.query({
     active: true,
@@ -31,7 +30,6 @@ async function getActiveTab() {
   return fallbackTabs?.[0] || null;
 }
 
-// DOM element cache
 const $ = {
   keyForm: null,
   urlForm: null,
@@ -50,10 +48,8 @@ const $ = {
   secretKey: null,
 };
 
-// Track current URL record (if already saved for this user)
 let existingUrlRecord = null;
 
-// The page being saved (the readonly URL field became a title display)
 let currentUrl = "";
 
 async function showUrlForm() {
@@ -87,31 +83,27 @@ async function prepareUrlForm() {
   currentUrl = tab?.url || "";
   showPageInfo(tab?.title || "", currentUrl);
 
-  // Reset previous lookup state
   existingUrlRecord = null;
   destroyPlacements();
   setMyLinks(true);
   showSavedStatus(null);
 
-  // If we have a sensible URL, try to see if it already exists
   if (currentUrl && isValidUrl(currentUrl)) {
     const record = await lookupUrl(currentUrl);
     if (record && record.id) {
       existingUrlRecord = record;
 
-      // Pre-select existing tags, if any
       if (Array.isArray(record.tags)) {
         setTagValues(record.tags);
       }
 
-      // One card per folder this link already lives in
       hydratePlacements(record.placements);
       setMyLinks(record.my_links !== false);
       showSavedStatus(record);
     }
   }
 
-  showResult(""); // clear any old message
+  showResult("");
 }
 
 function sleep(ms) {
@@ -143,8 +135,7 @@ function setMyLinks(checked) {
   syncMyLinksState();
 }
 
-// Unchecked = folder-only save: the card greys out and hides its tag field
-// (the selections stay, so re-checking restores them)
+// Unchecked = folder-only save; the hidden tag field keeps its selections
 function syncMyLinksState() {
   const on = $.myLinksCheck.checked;
   $.myLinksCard.classList.toggle("placement-card--off", !on);
@@ -162,7 +153,6 @@ function showResult(message) {
   $.resultDiv.textContent = message;
 }
 
-// Event handlers
 async function handleKeySubmit(e) {
   e.preventDefault();
 
@@ -270,9 +260,7 @@ async function handleResetKeys() {
   showKeyForm("Keys cleared. Please enter new API keys.");
 }
 
-// Initialize app
 document.addEventListener("DOMContentLoaded", async () => {
-  // Cache DOM elements
   $.keyForm = document.getElementById("key-form");
   $.urlForm = document.getElementById("url-form");
   $.pageTitle = document.getElementById("pageTitle");
@@ -299,7 +287,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   $.myLinksCheck.addEventListener("change", syncMyLinksState);
 
-  // Determine initial view
   const { accessKeyId, secretKey } = await storage.get([
     "accessKeyId",
     "secretKey",
@@ -323,7 +310,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     storage.set({ secretKey: $.secretKey.value.trim() });
   });
 
-  // Attach event listeners
   $.keyForm.addEventListener("submit", handleKeySubmit);
   $.urlForm.addEventListener("submit", handleUrlSubmit);
   $.resetKeysBtn.addEventListener("click", handleResetKeys);

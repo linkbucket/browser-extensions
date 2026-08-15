@@ -54,7 +54,7 @@
     <!-- URL save form -->
     <form id="url-form" style="display: none">
       <div class="saved-status" id="savedStatus" style="display: none">
-        <span class="saved-status__check">✓</span>
+        <span class="saved-status__check" aria-hidden="true">✓</span>
         <span class="saved-status__text" id="savedStatusText"></span>
       </div>
 
@@ -73,6 +73,7 @@
             id="myLinksCheck"
             class="placement-card__check"
             title="Save to My Links"
+            aria-label="Save to My Links"
             checked
           />
         </div>
@@ -111,7 +112,7 @@
 
       <div class="actions">
         <button id="resetKeys" type="button">Change API Keys</button>
-        <button id="saveButton" type="submit">Save</button>
+        <button id="saveButton" type="submit" aria-live="polite">Save</button>
       </div>
     </form>
 

@@ -1,5 +1,5 @@
 import { apiFetch, fetchFolders } from "./api.js";
-import { createTagSelect, tagLoader } from "./tags.js";
+import { createTagSelect, tagLoader, DROPDOWN_ROW_PX } from "./tags.js";
 import {
   normalizeFolders,
   folderLabel,
@@ -7,7 +7,6 @@ import {
   buildPlacementsPayload,
 } from "./utils.js";
 
-// One card per folder placement, keyed by folder id
 const cards = new Map();
 
 // Tom Select instance for the folder picker (exists only while choosing)
@@ -38,7 +37,7 @@ export function initPlacements({
   $.addButton.addEventListener("click", openFolderPicker);
 }
 
-export function addFolderCard(folder, tags = []) {
+function addFolderCard(folder, tags = []) {
   if (cards.has(folder.id)) return;
 
   const fragment = $.template.content.cloneNode(true);
@@ -116,8 +115,8 @@ async function openFolderPicker() {
   );
 
   if (folders.length === 0) {
-    // Nothing to offer (no folders, all placed, or the fetch failed) —
-    // say so instead of a button that silently does nothing.
+    // No folders, all placed, or the fetch failed - say so instead of
+    // a button that silently does nothing.
     $.addButton.textContent = "No folders to add";
     return;
   }
@@ -127,8 +126,6 @@ async function openFolderPicker() {
   $.addButton.style.display = "none";
   $.picker.style.display = "";
 
-  // The same Tom Select as the tag fields, in single mode, so every
-  // dropdown in the popup shares one look — and the list is searchable.
   pickerSelect = new window.TomSelect($.picker, {
     options: folders.map((folder) => ({
       id: folder.id,
@@ -142,12 +139,11 @@ async function openFolderPicker() {
     create: false,
     openOnFocus: true,
     selectOnTab: true,
-    // The picker sits at the popup's bottom with no room below, unlike
-    // the tag fields — so instead of fitting the list into that room,
-    // extend the body while choosing: the popup window resizes to
-    // content, and closeFolderPicker snaps it back.
+    // Unlike the tag fields the picker has no room below it, so extend
+    // the body while choosing (the popup window resizes to content);
+    // closeFolderPicker snaps it back.
     onDropdownOpen(dropdown) {
-      const listHeight = Math.min(byId.size, 5) * 38;
+      const listHeight = Math.min(byId.size, 5) * DROPDOWN_ROW_PX;
       const content = dropdown.querySelector(".ts-dropdown-content");
       if (content) content.style.maxHeight = `${listHeight}px`;
       document.body.style.minHeight = `${
@@ -155,11 +151,9 @@ async function openFolderPicker() {
       }px`;
     },
     onItemAdd(value) {
-      // Deferred: destroying the instance from inside its own event
-      // handler would pull internals out from under Tom Select. The card
-      // is added in the same tick as the teardown so the popup reflows
-      // once - card first would briefly stack card + picker + reserved
-      // height and flash a taller window.
+      // Deferred: destroying the instance from inside its own handler
+      // breaks Tom Select. Teardown and card add share the tick so the
+      // popup reflows once - card-first flashed a taller window.
       setTimeout(() => {
         closeFolderPicker();
         const folder = byId.get(value);
