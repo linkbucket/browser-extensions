@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.1]
+
+- Fix the popup blinking on open: the window now opens at its last rendered height instead of a header-only strip that snaps to full size
+
 ## [0.5.0]
 
 - Save links into folders with per-folder tags (placement cards); reopening a saved link shows and edits its existing placements
