@@ -1,16 +1,24 @@
 import { normalizeTags, splitSelectedTags } from "./utils.js";
 
-// Module-level Tom Select instance
-let tagSelect = null;
+export const DROPDOWN_ROW_PX = 38;
 
-export async function initTagsSelect(selectElement, apiFetchFn) {
-  if (!selectElement || !window.TomSelect) return;
+// Fill the room between a control and the popup's bottom edge, quantized
+// to whole rows so the list never ends mid-option. The three-row floor is
+// what the tightest layout (My Links only, no folder cards) has room for.
+export function sizeDropdownToRoom(control, dropdown) {
+  const room = window.innerHeight - control.getBoundingClientRect().bottom - 12;
+  const rows = Math.max(3, Math.floor(room / DROPDOWN_ROW_PX));
+  const content = dropdown.querySelector(".ts-dropdown-content");
+  if (content) content.style.maxHeight = `${rows * DROPDOWN_ROW_PX}px`;
+}
 
-  // Clean up previous instance
-  tagSelect?.destroy();
-  tagSelect = null;
+// Creates a Tom Select tag control on selectElement. `load` is called with
+// the typed query and must resolve to a tag options array ({id, title}).
+// Returns a handle, or null when Tom Select is unavailable.
+export function createTagSelect(selectElement, load) {
+  if (!selectElement || !window.TomSelect) return null;
 
-  tagSelect = new window.TomSelect(selectElement, {
+  const instance = new window.TomSelect(selectElement, {
     plugins: {
       remove_button: {
         title: "Remove this item",
@@ -25,7 +33,6 @@ export async function initTagsSelect(selectElement, apiFetchFn) {
     preload: false,
     loadThrottle: 300,
 
-    // Clear textbox and refresh options after adding an item
     onItemAdd: function () {
       this.setTextboxValue("");
       this.refreshOptions();
@@ -35,32 +42,19 @@ export async function initTagsSelect(selectElement, apiFetchFn) {
     // No leading/trailing hyphens, no consecutive hyphens
     createFilter: "^(?!-)(?!.*-$)(?!.*--)[0-9a-z-]+$",
 
-    // Allow selecting options with Tab key
     selectOnTab: true,
 
-    // Hide placeholder when items are selected
     hidePlaceholder: true,
 
-    // Don't prioritize adding new items over existing matches
     addPrecedence: false,
+
+    onDropdownOpen(dropdown) {
+      sizeDropdownToRoom(this.control, dropdown);
+    },
 
     load: async (query, callback) => {
       try {
-        const q = encodeURIComponent(query || "");
-        const response = await apiFetchFn(`/tags?query=${q}`);
-        if (!response.ok) {
-          console.error(
-            "Failed to load tags:",
-            response.status,
-            response.statusText,
-          );
-          callback();
-          return;
-        }
-
-        const json = await response.json();
-        const options = normalizeTags(json);
-        callback(options);
+        callback(await load(query || ""));
       } catch (error) {
         console.error("Failed to load tags:", error);
         callback(); // fail silently so user can still create new tags
@@ -71,30 +65,69 @@ export async function initTagsSelect(selectElement, apiFetchFn) {
       title: input,
     }),
   });
+
+  return {
+    getValues() {
+      return instance.getValue();
+    },
+    setValues(tags) {
+      const tagIds = tags.map((t) => String(t.id));
+
+      // setValue silently drops ids that have no registered option
+      tags.forEach((t) => {
+        const id = String(t.id);
+        if (!instance.options[id]) {
+          instance.addOption({ id, title: t.title });
+        }
+      });
+
+      instance.setValue(tagIds, true);
+    },
+    blur() {
+      instance.blur();
+    },
+    destroy() {
+      instance.destroy();
+    },
+  };
+}
+
+// Loader for a tag endpoint returning [{id, title}]: /tags for the user's
+// own tags, /folders/:id/tags for a folder's.
+export function tagLoader(apiFetchFn, path) {
+  return async (query) => {
+    const q = encodeURIComponent(query);
+    const response = await apiFetchFn(`${path}?query=${q}`);
+    if (!response.ok) {
+      console.error(
+        "Failed to load tags:",
+        response.status,
+        response.statusText,
+      );
+      return undefined;
+    }
+    return normalizeTags(await response.json());
+  };
+}
+
+// The My Links tag control (module-level singleton, one per popup)
+let tagSelect = null;
+
+export async function initTagsSelect(selectElement, apiFetchFn) {
+  tagSelect?.destroy();
+  tagSelect = createTagSelect(selectElement, tagLoader(apiFetchFn, "/tags"));
 }
 
 export function getSelectedTags(selectElement) {
   const values =
-    tagSelect?.getValue() ??
+    tagSelect?.getValues() ??
     Array.from(selectElement?.selectedOptions || []).map((o) => o.value);
 
   return splitSelectedTags(values);
 }
 
 export function setTagValues(tags) {
-  if (!tagSelect) return;
-
-  const tagIds = tags.map((t) => String(t.id));
-
-  // Make sure options exist in Tom Select before setting value
-  tags.forEach((t) => {
-    const id = String(t.id);
-    if (!tagSelect.options[id]) {
-      tagSelect.addOption({ id, title: t.title });
-    }
-  });
-
-  tagSelect.setValue(tagIds, true);
+  tagSelect?.setValues(tags);
 }
 
 export function blurTagSelect() {

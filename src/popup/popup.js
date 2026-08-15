@@ -1,4 +1,4 @@
-import { isValidUrl } from "./utils.js";
+import { isValidUrl, savedAgo, apiErrorMessage } from "./utils.js";
 import { storage } from "./storage.js";
 import { apiFetch, lookupUrl } from "./api.js";
 import {
@@ -8,76 +8,121 @@ import {
   blurTagSelect,
   destroyTagSelect,
 } from "./tags.js";
+import {
+  initPlacements,
+  hydratePlacements,
+  getPlacements,
+  placementCount,
+  destroyPlacements,
+} from "./placements.js";
 
-// Get active tab URL
-async function getActiveTabUrl() {
+async function getActiveTab() {
   const tabs = await browser.tabs.query({
     active: true,
     lastFocusedWindow: true,
   });
-  if (tabs?.[0]?.url) return tabs[0].url;
+  if (tabs?.[0]?.url) return tabs[0];
 
   const fallbackTabs = await browser.tabs.query({
     active: true,
     currentWindow: true,
   });
-  return fallbackTabs?.[0]?.url || "";
+  return fallbackTabs?.[0] || null;
 }
 
-// DOM element cache
 const $ = {
   keyForm: null,
   urlForm: null,
-  urlInput: null,
+  pageTitle: null,
+  pageUrl: null,
+  savedStatus: null,
+  savedStatusText: null,
   resultDiv: null,
   resetKeysBtn: null,
   tagsSelect: null,
+  saveButton: null,
+  myLinksCard: null,
+  myLinksCheck: null,
+  myLinksMeta: null,
   accessKeyId: null,
   secretKey: null,
 };
 
-// Track current URL record (if already saved for this user)
 let existingUrlRecord = null;
 
-// UI state management
+let currentUrl = "";
+
+let initPending = false;
+
 async function showUrlForm() {
   $.keyForm.style.display = "none";
+
+  // The catch keeps the reveal below unconditional: an unexpected
+  // rejection would otherwise leave the popup permanently blank.
+  const ready = prepareUrlForm().catch((error) => {
+    console.error("Popup init failed:", error);
+  });
+
+  // Reveal only once the lookup has composed the final layout, so the
+  // saved header and folder cards never pop into place after first
+  // paint. The cap keeps a slow network from holding the popup blank -
+  // then late data pops in, the rare case instead of every open.
+  await Promise.race([ready, sleep(400)]);
   $.urlForm.style.display = "block";
-
-  const [tabUrl] = await Promise.all([
-    getActiveTabUrl(),
-    initTagsSelect($.tagsSelect, apiFetch),
-  ]);
-  if (tabUrl) {
-    $.urlInput.value = tabUrl;
-  }
-
-  // Reset previous lookup state
-  existingUrlRecord = null;
-
-  // If we have a sensible URL, try to see if it already exists
-  if (tabUrl && isValidUrl(tabUrl)) {
-    const record = await lookupUrl(tabUrl);
-    if (record && record.id) {
-      existingUrlRecord = record;
-
-      // Pre-select existing tags, if any
-      if (Array.isArray(record.tags)) {
-        setTagValues(record.tags);
-      }
-
-      showResult("");
-    } else {
-      showResult(""); // clear any old message
-    }
-  } else {
-    showResult(""); // clear if URL is invalid or missing
-  }
+  await ready;
 
   // Prevent tag input from stealing focus on popup open —
   // deferred because the browser autofocuses the first editable
   // input (the readonly URL field is skipped) after our code runs.
   setTimeout(() => blurTagSelect(), 0);
+}
+
+async function prepareUrlForm() {
+  // Gates Save while the lookup is pending: the reveal cap can show the
+  // form early, and a save before the lookup lands would POST instead of
+  // updating (and the late lookup would rewrite the form mid-save)
+  initPending = true;
+  try {
+    await composeUrlForm();
+  } finally {
+    initPending = false;
+    refreshSaveButton();
+  }
+}
+
+async function composeUrlForm() {
+  const [tab] = await Promise.all([
+    getActiveTab(),
+    initTagsSelect($.tagsSelect, apiFetch),
+  ]);
+  currentUrl = tab?.url || "";
+  showPageInfo(tab?.title || "", currentUrl);
+
+  existingUrlRecord = null;
+  destroyPlacements();
+  setMyLinks(true);
+  showSavedStatus(null);
+
+  if (currentUrl && isValidUrl(currentUrl)) {
+    const record = await lookupUrl(currentUrl);
+    if (record && record.id) {
+      existingUrlRecord = record;
+
+      if (Array.isArray(record.tags)) {
+        setTagValues(record.tags);
+      }
+
+      hydratePlacements(record.placements);
+      setMyLinks(record.my_links !== false);
+      showSavedStatus(record);
+    }
+  }
+
+  showResult("");
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function showKeyForm(message = "") {
@@ -86,11 +131,52 @@ function showKeyForm(message = "") {
   $.resultDiv.textContent = message;
 }
 
+function showPageInfo(title, url) {
+  $.pageTitle.textContent = title || url;
+  $.pageUrl.textContent = url;
+  // With no title the URL takes its place; don't repeat it below
+  $.pageUrl.style.display = title ? "" : "none";
+}
+
+function showSavedStatus(record) {
+  const saved = Boolean(record?.id);
+  $.savedStatus.style.display = saved ? "" : "none";
+  $.savedStatusText.textContent = saved ? savedAgo(record.saved_at) : "";
+  refreshSaveButton();
+}
+
+function setMyLinks(checked) {
+  $.myLinksCheck.checked = checked;
+  syncMyLinksState();
+}
+
+// Unchecked = folder-only save; the hidden tag field keeps its selections
+function syncMyLinksState() {
+  const on = $.myLinksCheck.checked;
+  $.myLinksCard.classList.toggle("placement-card--off", !on);
+  $.myLinksMeta.textContent = on ? "private" : "not saved here";
+  refreshSaveButton();
+}
+
+function nothingSelected() {
+  return !$.myLinksCheck.checked && placementCount() === 0;
+}
+
+// Deselecting everything on a saved link is an explicit removal (the
+// button offers "Move to trash"); on a new link there is nothing to do
+function removalIntent() {
+  return Boolean(existingUrlRecord?.id) && nothingSelected();
+}
+
+function updateSaveGuard() {
+  $.saveButton.disabled =
+    saveBusy || initPending || (!existingUrlRecord?.id && nothingSelected());
+}
+
 function showResult(message) {
   $.resultDiv.textContent = message;
 }
 
-// Event handlers
 async function handleKeySubmit(e) {
   e.preventDefault();
 
@@ -110,86 +196,145 @@ async function handleKeySubmit(e) {
 async function handleUrlSubmit(e) {
   e.preventDefault();
 
-  const url = $.urlInput.value.trim();
-  if (!isValidUrl(url)) {
+  if (!isValidUrl(currentUrl)) {
     showResult("This page cannot be saved (HTTPS required).");
     return;
   }
 
-  showResult("Saving...");
+  showResult("");
+  const removing = removalIntent();
+  setSaveBusy(true);
 
   try {
-    const { user_tag_ids, tag_names } = getSelectedTags($.tagsSelect);
+    const my_links = $.myLinksCheck.checked;
+    // A folder-only save must not send the hidden field's tags - the API
+    // would create the user tags without attaching them to anything.
+    const { user_tag_ids, tag_names } = my_links
+      ? getSelectedTags($.tagsSelect)
+      : { user_tag_ids: [], tag_names: [] };
 
-    let response;
+    // Full desired state: a removed card removes that placement
+    // server-side, and my_links false trashes the personal save.
+    const payload = {
+      user_tag_ids,
+      tag_names,
+      my_links,
+      placements: getPlacements(),
+    };
 
-    if (existingUrlRecord && existingUrlRecord.id) {
-      // Update existing link
-      response = await apiFetch(`/user_bookmarks/${existingUrlRecord.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          url: {
-            user_tag_ids,
-            tag_names,
-          },
-        }),
-      });
-    } else {
-      // Create new link
-      response = await apiFetch("/urls", {
-        method: "POST",
-        body: JSON.stringify({
-          url: {
-            url,
-            user_tag_ids,
-            tag_names,
-          },
-        }),
-      });
-    }
+    const response = existingUrlRecord?.id
+      ? await apiFetch(`/user_bookmarks/${existingUrlRecord.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ user_bookmark: payload }),
+        })
+      : await apiFetch("/urls", {
+          method: "POST",
+          body: JSON.stringify({ url: { url: currentUrl, ...payload } }),
+        });
 
     if (response.ok) {
-      if (existingUrlRecord && existingUrlRecord.id) {
-        showResult("Success! Link updated.");
-      } else {
-        showResult("Success! Link added.");
+      if (removing) {
+        // The link is in trash everywhere now; the popup becomes a fresh
+        // save form so a change of heart re-saves via POST (which also
+        // restores a trashed My Links save).
+        existingUrlRecord = null;
+        setMyLinks(true);
+        showSavedStatus(null);
+      } else if (!existingUrlRecord?.id) {
+        // Switch a first save to update mode: POST is additive, so a
+        // follow-up save could never remove a card without the bookmark
+        // id. Deferred saves (no bookmark yet) stay in create mode, where
+        // additive is the only possible semantics anyway.
+        const record = await lookupUrl(currentUrl);
+        if (record?.id) {
+          existingUrlRecord = record;
+          showSavedStatus(record);
+        }
       }
+      flashSaved(removing);
     } else {
-      const errorText = await response.text().catch(() => "");
+      const body = await response.text().catch(() => "");
       showResult(
-        `Error ${response.status}: ${response.statusText}. ${errorText}`,
+        `Error ${response.status}: ${apiErrorMessage(body, response.statusText)}`,
       );
+      setSaveBusy(false);
     }
   } catch (error) {
     showResult(`Network error: ${error?.message || String(error)}`);
+    setSaveBusy(false);
   }
+}
+
+// Save feedback lives in the button so the popup never grows on success;
+// the result area below is for errors only
+let saveBusy = false;
+
+function saveIdleLabel() {
+  if (removalIntent()) return "Move to trash";
+  return existingUrlRecord?.id ? "Save changes" : "Save";
+}
+
+function refreshSaveButton() {
+  $.saveButton.textContent = saveBusy
+    ? removalIntent()
+      ? "Removing…"
+      : "Saving…"
+    : saveIdleLabel();
+  updateSaveGuard();
+}
+
+function setSaveBusy(busy) {
+  saveBusy = busy;
+  refreshSaveButton();
+}
+
+function flashSaved(removed) {
+  $.saveButton.textContent = removed ? "Removed ✓" : "Saved ✓";
+  setTimeout(() => setSaveBusy(false), 1600);
 }
 
 async function handleResetKeys() {
   await storage.remove(["accessKeyId", "secretKey"]);
   existingUrlRecord = null;
+  currentUrl = "";
   destroyTagSelect();
+  destroyPlacements();
+  setMyLinks(true);
 
   $.accessKeyId.value = "";
   $.secretKey.value = "";
-  $.urlInput.value = "";
+  showPageInfo("", "");
 
   showKeyForm("Keys cleared. Please enter new API keys.");
 }
 
-// Initialize app
 document.addEventListener("DOMContentLoaded", async () => {
-  // Cache DOM elements
   $.keyForm = document.getElementById("key-form");
   $.urlForm = document.getElementById("url-form");
-  $.urlInput = document.getElementById("url");
+  $.pageTitle = document.getElementById("pageTitle");
+  $.pageUrl = document.getElementById("pageUrl");
+  $.savedStatus = document.getElementById("savedStatus");
+  $.savedStatusText = document.getElementById("savedStatusText");
   $.resultDiv = document.getElementById("result");
   $.resetKeysBtn = document.getElementById("resetKeys");
   $.tagsSelect = document.getElementById("tags");
+  $.saveButton = document.getElementById("saveButton");
+  $.myLinksCard = document.getElementById("my-links-card");
+  $.myLinksCheck = document.getElementById("myLinksCheck");
+  $.myLinksMeta = document.getElementById("myLinksMeta");
   $.accessKeyId = document.getElementById("accessKeyId");
   $.secretKey = document.getElementById("secretKey");
 
-  // Determine initial view
+  initPlacements({
+    stack: document.getElementById("folder-cards"),
+    template: document.getElementById("folder-card-template"),
+    addButton: document.getElementById("addFolder"),
+    picker: document.getElementById("folderPicker"),
+    changed: refreshSaveButton,
+  });
+
+  $.myLinksCheck.addEventListener("change", syncMyLinksState);
+
   const { accessKeyId, secretKey } = await storage.get([
     "accessKeyId",
     "secretKey",
@@ -213,7 +358,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     storage.set({ secretKey: $.secretKey.value.trim() });
   });
 
-  // Attach event listeners
   $.keyForm.addEventListener("submit", handleKeySubmit);
   $.urlForm.addEventListener("submit", handleUrlSubmit);
   $.resetKeysBtn.addEventListener("click", handleResetKeys);

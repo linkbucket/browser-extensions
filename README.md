@@ -8,6 +8,7 @@ Supports **Google Chrome** (and Chromium-based browsers) and **Mozilla Firefox**
 
 - One-click capture of the active tab's URL
 - Tag support — search existing tags or create new ones inline
+- Folder support — add a link to shared folders, each with its own folder tags
 - Local, secure storage of your API credentials (never sent to third parties)
 - "Change API keys" flow to rotate or remove credentials
 - Zero analytics or tracking scripts
@@ -65,7 +66,8 @@ npm run build
 │   ├── popup.js            # Entry point — DOM, UI state, event handlers
 │   ├── api.js              # API fetch wrapper and URL lookup
 │   ├── storage.js          # browser.storage.local wrapper
-│   ├── tags.js             # Tom Select lifecycle (init, get, set, destroy)
+│   ├── tags.js             # Tom Select tag controls (factory + My Links instance)
+│   ├── placements.js       # Folder placement cards (add, remove, hydrate)
 │   └── utils.js            # Pure helpers (URL validation, tag normalization)
 ├── tests/                  # Unit tests
 ├── assets/                 # Icons, images, bundled fonts

@@ -15,17 +15,20 @@
 }
 
 :root {
-  --fs-base: 16px;
-  --fs-input: 16px;
-  --color-bg: hsla(43, 30%, 95%, 1);
-  --color-border: #000;
+  --fs-base: 15px;
+  --fs-input: 14px;
+  --color-bg: #f4f1ea;
+  --color-ink: #26205e;
+  --color-muted: #8a857c;
+  --color-border: #e4dfd5;
   --color-accent: #ffaa8e;
   --color-accent-hover: #ff9877;
-  --color-tag-bg: hsl(20.63deg, 84.21%, 85.1%);
+  --color-tag-bg: #fbd0b9;
   --color-tag-hover: hsl(130deg, 32%, 51%);
-  --radius-input: 8px;
+  --radius-input: 10px;
+  --radius-card: 14px;
   --radius-button: 25px;
-  --space-form-gap: 10px;
+  --space-form-gap: 12px;
   --space-label-top: 18px;
   --space-label-bottom: 6px;
   --space-actions-top: 18px;
@@ -45,26 +48,30 @@ textarea {
 }
 
 body {
-  width: 470px;
-  padding: 0 1.5rem 1.25rem;
+  width: 420px;
+  padding: 0 22px 20px;
   margin: 0;
   background: var(--color-bg);
+  color: var(--color-ink);
   font-family: "Work Sans", sans-serif;
   font-size: var(--fs-base);
 }
 
-h1 {
-  color: black;
-  font-size: 22px;
-  font-style: normal;
-  margin: 0 0 1rem;
+/* Header: bucket mark + wordmark */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 16px;
 }
 
-img {
-  display: block;
-  margin: 1rem auto 0.5rem;
-  max-width: 100%;
-  height: auto;
+.brand__mark {
+  width: 28px;
+  height: 28px;
+}
+
+.brand__wordmark {
+  height: 16px;
 }
 
 /* Forms */
@@ -76,7 +83,8 @@ form {
 /* Space between each label+input pair is handled by label top margin */
 form label {
   display: block;
-  font-size: 19px;
+  font-size: 14px;
+  font-weight: bold;
   margin: var(--space-label-top) 0 var(--space-label-bottom);
   line-height: 1.1;
 }
@@ -89,29 +97,234 @@ form label:first-of-type {
 form input {
   width: 100%;
   max-width: 100%;
-  height: 52px;
+  height: 44px;
   border-radius: var(--radius-input);
-  border: 1px solid var(--color-border);
-  padding: 0 0.65em;
+  border: 1.5px solid var(--color-border);
+  padding: 0 12px;
   background: #fff;
   font-size: var(--fs-input);
   line-height: 1.2;
-  opacity: 0.95;
   transition:
     border-color 120ms,
     box-shadow 120ms;
 }
 
 form input[readonly] {
-  border: 1px solid hsl(0, 0%, 44%);
-  opacity: 0.7;
+  color: var(--color-muted);
   cursor: default;
 }
 
 form input:focus {
   outline: none;
-  border-color: #333;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 2px rgba(38, 32, 94, 0.12);
+}
+
+/* Already-saved header: status is the headline, not a footnote */
+.saved-status {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.saved-status__check {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  background: #d6f0c2;
+  border-radius: 50%;
+}
+
+.saved-status__text {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+/* The page being saved: tab title with the URL beneath */
+.pageinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 14px;
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-input);
+}
+
+.pageinfo__title {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pageinfo__url {
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--color-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Placement cards (My Links + one per folder) */
+.placement-card {
+  padding: 16px;
+  margin-top: var(--space-label-top);
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+/* My Links unchecked: greyed, tag field hidden (selections survive) */
+.placement-card--off {
+  background: #faf8f3;
+}
+
+.placement-card--off .placement-card__name {
+  color: var(--color-muted);
+}
+
+.placement-card--off .placement-card__header {
+  margin-bottom: 0;
+}
+
+.placement-card--off .ts-wrapper,
+.placement-card--off select {
+  display: none;
+}
+
+#folder-cards .placement-card {
+  margin-top: var(--space-form-gap);
+}
+
+.placement-card__header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 11px;
+}
+
+.placement-card__name {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.placement-card__check {
+  width: 17px;
+  height: 17px;
+  margin-left: auto;
+  accent-color: var(--color-accent);
+}
+
+.placement-pill {
+  padding: 4px 13px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 99px;
+}
+
+.placement-pill--folder {
+  color: var(--color-ink);
+  background: var(--color-tag-bg);
+}
+
+.placement-card__meta {
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--color-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placement-card__remove {
+  padding: 2px 6px;
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--color-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.placement-card__remove:hover,
+.placement-card__remove:focus {
+  color: var(--color-ink);
+  outline: none;
+}
+
+/* Add-to-folder affordance */
+#add-folder-row {
+  margin-top: var(--space-form-gap);
+}
+
+#addFolder {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 14px;
+  color: #6f6a60;
+  cursor: pointer;
+  background: none;
+  border: 1.5px dashed #cfc9bd;
+  border-radius: 12px;
+}
+
+#addFolder:hover,
+#addFolder:focus {
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+  outline: none;
+}
+
+#addFolder:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+#folderPicker {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-input);
+  font-size: var(--fs-input);
+}
+
+/* Folder picker: single-mode Tom Select matching the input styling */
+.ts-wrapper.single .ts-control {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 5px 36px 5px 12px;
+  font-size: var(--fs-input);
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-input);
+  transition:
+    border-color 120ms,
+    box-shadow 120ms;
+}
+
+.ts-wrapper.single.focus .ts-control,
+.ts-wrapper.single.dropdown-active .ts-control {
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 2px rgba(38, 32, 94, 0.12);
+}
+
+/* Disclosure chevron, tucked in from the edge */
+.ts-wrapper.single .ts-control::after {
+  right: 16px;
+  border-color: var(--color-muted) transparent transparent;
+}
+
+.ts-wrapper.single.dropdown-active .ts-control::after {
+  border-color: transparent transparent var(--color-muted);
 }
 
 /* Actions row (shared) */
@@ -133,7 +346,7 @@ form input:focus {
 
 /* Primary submit button */
 button[type="submit"] {
-  padding: 12px 40px;
+  padding: 11px 32px;
   border: none;
   border-radius: var(--radius-button);
   background: var(--color-accent);
@@ -147,6 +360,21 @@ button[type="submit"]:hover,
 button[type="submit"]:focus {
   background: var(--color-accent-hover);
   outline: none;
+}
+
+button[type="submit"]:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* Fixed box for the label swap (Save / Saving… / Saved ✓): min-width
+   fits the widest state, fixed height keeps the ✓ glyph's taller line
+   from nudging the popup by a pixel */
+#saveButton {
+  min-width: 172px;
+  height: 42px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 /* Text-style secondary action */
@@ -167,11 +395,14 @@ button[type="submit"]:focus {
   outline: none;
 }
 
-/* Result area */
+/* Result area: transient save feedback only; takes no space when idle */
 #result {
   margin-top: 14px;
-  font-size: 14px;
-  min-height: 18px;
+  font-size: 13px;
+}
+
+#result:empty {
+  display: none;
 }
 
 /* Subtle fade-in when forms are revealed */
@@ -205,12 +436,11 @@ form:not([style*="display:none"]) {
 }
 
 .ts-wrapper.multi .ts-control {
-  padding: 0 0.65em;
-  min-height: 50px;
+  padding: 5px 12px;
+  min-height: 42px;
   border-radius: var(--radius-input);
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   background: #fff;
-  opacity: 0.95;
   transition:
     border-color 120ms,
     box-shadow 120ms;
@@ -219,12 +449,19 @@ form:not([style*="display:none"]) {
   align-items: center;
 }
 
-.ts-wrapper.multi .ts-control > input {
+/* Both modes: the control's inner search input must not inherit the
+   generic form-input chrome (44px height, padding), or the control
+   puffs up around it */
+.ts-wrapper .ts-control > input {
   height: auto !important;
   padding: 0;
   margin: 0;
   font-size: var(--fs-input) !important;
-  line-height: 1.4 !important;
+
+  /* Pixel value matching the tag pills' visual height: Chromium sizes
+     the text caret from the input's line box, so a type-sized
+     line-height leaves a half-height caret beside the taller pills. */
+  line-height: 25px !important;
 }
 
 .ts-wrapper.multi.has-items .ts-control > input {
@@ -235,18 +472,19 @@ form:not([style*="display:none"]) {
 
 .ts-wrapper.multi.has-items .ts-control {
   gap: 6px;
-  padding: 8px 0.65em;
-  min-height: 50px;
+  padding: 7px 12px;
+  min-height: 42px;
 }
 
 /* Tag pills */
 .ts-wrapper.multi .ts-control > div {
   background: var(--color-tag-bg);
   border: 0;
-  border-radius: 0.625rem;
+  border-radius: 99px;
   color: inherit;
   margin: 0;
-  padding: 4px 8px;
+  padding: 3px 11px;
+  font-size: 13px;
 }
 
 .ts-wrapper.multi .ts-control > div.active {
@@ -256,7 +494,7 @@ form:not([style*="display:none"]) {
 
 /* Remove button on tag pills */
 .ts-wrapper.plugin-remove_button .item .remove {
-  border-radius: 0 0.625rem 0.625rem 0;
+  border-radius: 0 99px 99px 0;
 }
 
 .ts-wrapper.plugin-remove_button:not(.rtl) .item .remove {
@@ -268,30 +506,28 @@ form:not([style*="display:none"]) {
 }
 
 .ts-wrapper.multi.focus .ts-control {
-  border-color: #333;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 2px rgba(38, 32, 94, 0.12);
 }
 
-/* Tom Select dropdown (opens upward) */
+/* Tom Select dropdown (opens downward; sized per open in tags.js) */
 .ts-dropdown {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-input) var(--radius-input) 0 0;
-  border-bottom: 0;
-  box-shadow: 0 -4px 12px hsl(0deg 0% 0% / 0.15);
+  border: 1.5px solid var(--color-border);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-input) var(--radius-input);
+  box-shadow: 0 6px 14px hsl(0deg 0% 0% / 0.14);
   overflow: hidden;
-  top: auto;
-  bottom: 100%;
 }
 
 .ts-dropdown-content {
-  height: 200px;
+  max-height: 114px;
   overflow-y: auto;
 }
 
 .ts-dropdown .option,
 .ts-dropdown .create,
 .ts-dropdown .no-results {
-  padding: 10px 12px;
+  padding: 9px 12px;
 }
 
 .ts-dropdown .active {

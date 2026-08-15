@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.0]
+
+- Save links into folders with per-folder tags (placement cards); reopening a saved link shows and edits its existing placements
+- My Links is optional: a checkbox on its card enables folder-only saves
+- Show the page title with the URL beneath it instead of a raw URL field
+- Tag suggestions open downward and size themselves to the room below the field
+- The folder picker is the same searchable Tom Select control as the tag fields
+- An already-saved link opens with a green check and "Saved N days ago", and its button reads "Save changes"
+- Deselecting every place on a saved link turns the button into "Move to trash"
+- Compact restyle following the design explorations: smaller fields and spacing, and a bucket mark + wordmark header replacing the large illustration
+
 ## [0.4.2]
 
 - Replace webextension-polyfill with a native chrome/browser shim (smaller bundle)

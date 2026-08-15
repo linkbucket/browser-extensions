@@ -11,8 +11,14 @@
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <img src="/assets/images/skate-bucky.svg" alt="Linkbucket logo" />
-    <h1>Save to Linkbucket</h1>
+    <h1 class="brand">
+      <img src="/assets/images/bucket-mark.svg" alt="" class="brand__mark" />
+      <img
+        src="/assets/images/lb-logo.svg"
+        alt="Save to Linkbucket"
+        class="brand__wordmark"
+      />
+    </h1>
 
     <!-- Key entry form -->
     <form id="key-form" style="display: none">
@@ -47,32 +53,66 @@
 
     <!-- URL save form -->
     <form id="url-form" style="display: none">
-      <label for="url">URL</label>
-      <input
-        type="url"
-        name="url"
-        id="url"
-        pattern="https://.*"
-        spellcheck="false"
-        autocorrect="off"
-        autocapitalize="off"
-        readonly
-        required
-      />
+      <div class="saved-status" id="savedStatus" style="display: none">
+        <span class="saved-status__check" aria-hidden="true">✓</span>
+        <span class="saved-status__text" id="savedStatusText"></span>
+      </div>
 
-      <!-- New: Tags field -->
-      <label>Tags</label>
-      <select
-        id="tags"
-        name="tags[]"
-        multiple
-        placeholder="Add tags…"
-        autocomplete="off"
-      ></select>
+      <div class="pageinfo">
+        <div class="pageinfo__title" id="pageTitle"></div>
+        <div class="pageinfo__url" id="pageUrl"></div>
+      </div>
+
+      <!-- Placement cards: My Links plus one card per folder -->
+      <section class="placement-card" id="my-links-card">
+        <div class="placement-card__header">
+          <span class="placement-card__name">My Links</span>
+          <span class="placement-card__meta" id="myLinksMeta">private</span>
+          <input
+            type="checkbox"
+            id="myLinksCheck"
+            class="placement-card__check"
+            title="Save to My Links"
+            aria-label="Save to My Links"
+            checked
+          />
+        </div>
+        <select
+          id="tags"
+          name="tags[]"
+          multiple
+          placeholder="Add tags…"
+          autocomplete="off"
+        ></select>
+      </section>
+
+      <div id="folder-cards"></div>
+
+      <template id="folder-card-template">
+        <section class="placement-card placement-card--folder">
+          <div class="placement-card__header">
+            <span class="placement-pill placement-pill--folder"></span>
+            <span class="placement-card__meta"></span>
+            <button
+              type="button"
+              class="placement-card__remove"
+              title="Remove from this folder"
+            >
+              ✕
+            </button>
+          </div>
+          <select multiple placeholder="Add tags…" autocomplete="off"></select>
+        </section>
+      </template>
+
+      <div id="add-folder-row">
+        <button type="button" id="addFolder">+ Add to folder</button>
+        <select id="folderPicker" style="display: none"></select>
+      </div>
 
       <div class="actions">
         <button id="resetKeys" type="button">Change API Keys</button>
-        <button type="submit">Save link</button>
+        <button id="saveButton" type="submit" aria-live="polite">Save</button>
       </div>
     </form>
 

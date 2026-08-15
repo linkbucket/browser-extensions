@@ -1,5 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { isValidUrl, normalizeTags, splitSelectedTags } from "../src/popup/utils.js";
+import {
+  isValidUrl,
+  normalizeTags,
+  splitSelectedTags,
+  normalizeFolders,
+  folderLabel,
+  folderMeta,
+  savedAgo,
+  apiErrorMessage,
+  buildPlacementsPayload,
+} from "../src/popup/utils.js";
 
 describe("isValidUrl", () => {
   it("accepts a valid HTTPS URL", () => {
@@ -141,10 +151,12 @@ describe("splitSelectedTags", () => {
   });
 
   it("skips empty and falsy values", () => {
-    expect(splitSelectedTags(["id-1", "", null, undefined, "new:tag"])).toEqual({
-      user_tag_ids: ["id-1"],
-      tag_names: ["tag"],
-    });
+    expect(splitSelectedTags(["id-1", "", null, undefined, "new:tag"])).toEqual(
+      {
+        user_tag_ids: ["id-1"],
+        tag_names: ["tag"],
+      },
+    );
   });
 
   it("returns empty arrays for empty input", () => {
@@ -152,5 +164,161 @@ describe("splitSelectedTags", () => {
       user_tag_ids: [],
       tag_names: [],
     });
+  });
+});
+
+describe("normalizeFolders", () => {
+  it("normalizes a folder response", () => {
+    const input = [
+      {
+        id: "f-1",
+        title: "Recipes",
+        shared: false,
+        owner_name: "User One",
+        member_count: 1,
+      },
+      {
+        id: "f-2",
+        title: "Research",
+        shared: true,
+        owner_name: "User Two",
+        member_count: 3,
+      },
+    ];
+
+    expect(normalizeFolders(input)).toEqual([
+      {
+        id: "f-1",
+        title: "Recipes",
+        shared: false,
+        owner_name: "User One",
+        member_count: 1,
+      },
+      {
+        id: "f-2",
+        title: "Research",
+        shared: true,
+        owner_name: "User Two",
+        member_count: 3,
+      },
+    ]);
+  });
+
+  it("drops entries without an id and defaults missing fields", () => {
+    const input = [{ title: "No id" }, { id: "f-3" }, null, "junk"];
+
+    expect(normalizeFolders(input)).toEqual([
+      {
+        id: "f-3",
+        title: "Untitled",
+        shared: false,
+        owner_name: "",
+        member_count: 1,
+      },
+    ]);
+  });
+
+  it("returns an empty array for non-array input", () => {
+    expect(normalizeFolders(null)).toEqual([]);
+    expect(normalizeFolders({ error: "nope" })).toEqual([]);
+  });
+});
+
+describe("folderLabel", () => {
+  it("uses the bare title for the user's own folder", () => {
+    expect(folderLabel({ title: "Recipes", shared: false })).toBe("Recipes");
+  });
+
+  it("appends the owner for shared folders", () => {
+    expect(
+      folderLabel({ title: "Research", shared: true, owner_name: "User Two" }),
+    ).toBe("Research (User Two's)");
+  });
+});
+
+describe("folderMeta", () => {
+  it("describes a private folder", () => {
+    expect(folderMeta({ member_count: 1 })).toBe("private");
+  });
+
+  it("describes a shared folder with its member count", () => {
+    expect(folderMeta({ member_count: 3 })).toBe("shared · 3 people");
+  });
+});
+
+describe("buildPlacementsPayload", () => {
+  it("splits each card's values into ids and new names", () => {
+    const payload = buildPlacementsPayload([
+      { folderId: "f-1", values: ["ft-1", "new:reading"] },
+      { folderId: "f-2", values: [] },
+    ]);
+
+    expect(payload).toEqual([
+      { folder_id: "f-1", folder_tag_ids: ["ft-1"], tag_names: ["reading"] },
+      { folder_id: "f-2", folder_tag_ids: [], tag_names: [] },
+    ]);
+  });
+
+  it("returns an empty array for no cards", () => {
+    expect(buildPlacementsPayload([])).toEqual([]);
+  });
+});
+
+describe("savedAgo", () => {
+  const now = new Date("2026-08-15T12:00:00Z");
+
+  it("says today for a same-day save", () => {
+    expect(savedAgo("2026-08-15T08:00:00Z", now)).toBe("Saved today");
+  });
+
+  it("says yesterday", () => {
+    expect(savedAgo("2026-08-14T08:00:00Z", now)).toBe("Saved yesterday");
+  });
+
+  it("counts recent days", () => {
+    expect(savedAgo("2026-08-12T08:00:00Z", now)).toBe("Saved 3 days ago");
+  });
+
+  it("uses calendar days at midnight boundaries", () => {
+    const justAfterMidnight = new Date(2026, 7, 15, 0, 5);
+    const justBeforeMidnight = new Date(2026, 7, 14, 23, 55);
+    expect(savedAgo(justBeforeMidnight.toISOString(), justAfterMidnight)).toBe(
+      "Saved yesterday",
+    );
+  });
+
+  it("falls back to the date for old saves", () => {
+    expect(savedAgo("2026-01-10T08:00:00Z", now)).toMatch(/^Saved .*2026$/);
+  });
+
+  it("degrades to plain Saved without a usable date", () => {
+    expect(savedAgo(null, now)).toBe("Saved");
+    expect(savedAgo("not-a-date", now)).toBe("Saved");
+  });
+});
+
+describe("apiErrorMessage", () => {
+  it("extracts the API's error key", () => {
+    expect(
+      apiErrorMessage('{"error":"Subscription required"}', "Forbidden"),
+    ).toBe("Subscription required");
+  });
+
+  it("falls back to the raw body when it is not JSON", () => {
+    expect(apiErrorMessage("<html>bad gateway</html>", "Bad Gateway")).toBe(
+      "<html>bad gateway</html>",
+    );
+  });
+
+  it("falls back to the fallback for an empty body", () => {
+    expect(apiErrorMessage("", "Internal Server Error")).toBe(
+      "Internal Server Error",
+    );
+  });
+
+  it("falls back for JSON without an error key", () => {
+    expect(apiErrorMessage('{"ok":true}', "Unprocessable Content")).toBe(
+      '{"ok":true}',
+    );
   });
 });

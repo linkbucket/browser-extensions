@@ -30,6 +30,84 @@ export function normalizeTags(json) {
     .filter((t) => t.id && t.title); // Only include valid tags
 }
 
+// Normalize backend folder response - expects array of
+// {id, title, shared, owner_name, member_count}
+export function normalizeFolders(json) {
+  const list = Array.isArray(json) ? json : [];
+
+  return list
+    .filter((f) => f && typeof f === "object")
+    .map((f) => ({
+      id: String(f.id ?? ""),
+      title: String(f.title ?? "Untitled"),
+      shared: Boolean(f.shared),
+      owner_name: String(f.owner_name ?? ""),
+      member_count: Number(f.member_count) || 1,
+    }))
+    .filter((f) => f.id);
+}
+
+// "Name (Owner's)" for folders shared with the user, matching the web app's
+// folder picker labels
+export function folderLabel(folder) {
+  return folder.shared
+    ? `${folder.title} (${folder.owner_name}'s)`
+    : folder.title;
+}
+
+export function folderMeta(folder) {
+  return folder.member_count > 1
+    ? `shared · ${folder.member_count} people`
+    : "private";
+}
+
+// The API answers errors as {error: "message"}; fall back to the raw
+// body, then to the given fallback (e.g. the HTTP status text)
+export function apiErrorMessage(body, fallback) {
+  try {
+    const parsed = JSON.parse(body);
+    if (parsed?.error) return String(parsed.error);
+  } catch {
+    // not JSON - use the body as-is
+  }
+  return body || fallback;
+}
+
+// "Saved today" / "Saved yesterday" / "Saved N days ago", falling back
+// to the date for older saves and to plain "Saved" without a usable date
+export function savedAgo(isoDate, now = new Date()) {
+  const saved = new Date(isoDate ?? "");
+  if (Number.isNaN(saved.getTime())) return "Saved";
+
+  // Calendar days, not 24h periods: a 23:55 save reads "yesterday" at
+  // 00:05, and the boundary follows the user's midnight across DST
+  const startOfDay = (d) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const days = Math.round((startOfDay(now) - startOfDay(saved)) / 86400000);
+  if (days <= 0) return "Saved today";
+  if (days === 1) return "Saved yesterday";
+  if (days < 30) return `Saved ${days} days ago`;
+  return `Saved ${saved.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })}`;
+}
+
+// Build the API placements payload from per-card selections:
+// [{folderId, values}] where values are a tag select's raw values
+// (existing folder_tag ids and "new:name" entries)
+export function buildPlacementsPayload(cardSelections) {
+  return cardSelections.map(({ folderId, values }) => {
+    const { user_tag_ids, tag_names } = splitSelectedTags(values);
+    return {
+      folder_id: folderId,
+      folder_tag_ids: user_tag_ids,
+      tag_names,
+    };
+  });
+}
+
 // Split selected tag values into existing IDs and new tag names
 export function splitSelectedTags(values) {
   const selected = Array.isArray(values) ? values : [values];

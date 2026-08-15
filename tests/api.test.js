@@ -6,7 +6,7 @@ vi.mock("../src/popup/storage.js", () => ({
 }));
 
 import { storage } from "../src/popup/storage.js";
-import { apiFetch, lookupUrl } from "../src/popup/api.js";
+import { apiFetch, lookupUrl, fetchFolders } from "../src/popup/api.js";
 
 describe("apiFetch", () => {
   let fetchMock;
@@ -99,6 +99,61 @@ describe("lookupUrl", () => {
     fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
 
     await expect(lookupUrl("https://example.com")).resolves.toBeNull();
+    expect(errorSpy).toHaveBeenCalled();
+  });
+});
+
+describe("fetchFolders", () => {
+  let fetchMock;
+  let errorSpy;
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    storage.get.mockReset();
+    storage.get.mockResolvedValue({});
+    errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
+  it("returns the parsed folder list on a 200 response", async () => {
+    const body = [
+      {
+        id: "f-1",
+        title: "Recipes",
+        shared: false,
+        owner_name: "User One",
+        member_count: 1,
+      },
+    ];
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => body,
+    });
+
+    expect(await fetchFolders()).toEqual(body);
+  });
+
+  it("returns null and logs on a non-OK response", async () => {
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+    });
+
+    expect(await fetchFolders()).toBeNull();
+    expect(errorSpy).toHaveBeenCalled();
+  });
+
+  it("returns null and logs on a network error", async () => {
+    fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    await expect(fetchFolders()).resolves.toBeNull();
     expect(errorSpy).toHaveBeenCalled();
   });
 });
