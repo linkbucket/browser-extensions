@@ -61,6 +61,18 @@ export function folderMeta(folder) {
     : "private";
 }
 
+// The API answers errors as {error: "message"}; fall back to the raw
+// body, then to the given fallback (e.g. the HTTP status text)
+export function apiErrorMessage(body, fallback) {
+  try {
+    const parsed = JSON.parse(body);
+    if (parsed?.error) return String(parsed.error);
+  } catch {
+    // not JSON - use the body as-is
+  }
+  return body || fallback;
+}
+
 // "Saved today" / "Saved yesterday" / "Saved N days ago", falling back
 // to the date for older saves and to plain "Saved" without a usable date
 export function savedAgo(isoDate, now = new Date()) {

@@ -7,6 +7,7 @@ import {
   folderLabel,
   folderMeta,
   savedAgo,
+  apiErrorMessage,
   buildPlacementsPayload,
 } from "../src/popup/utils.js";
 
@@ -285,5 +286,31 @@ describe("savedAgo", () => {
   it("degrades to plain Saved without a usable date", () => {
     expect(savedAgo(null, now)).toBe("Saved");
     expect(savedAgo("not-a-date", now)).toBe("Saved");
+  });
+});
+
+describe("apiErrorMessage", () => {
+  it("extracts the API's error key", () => {
+    expect(
+      apiErrorMessage('{"error":"Subscription required"}', "Forbidden"),
+    ).toBe("Subscription required");
+  });
+
+  it("falls back to the raw body when it is not JSON", () => {
+    expect(apiErrorMessage("<html>bad gateway</html>", "Bad Gateway")).toBe(
+      "<html>bad gateway</html>",
+    );
+  });
+
+  it("falls back to the fallback for an empty body", () => {
+    expect(apiErrorMessage("", "Internal Server Error")).toBe(
+      "Internal Server Error",
+    );
+  });
+
+  it("falls back for JSON without an error key", () => {
+    expect(apiErrorMessage('{"ok":true}', "Unprocessable Content")).toBe(
+      '{"ok":true}',
+    );
   });
 });

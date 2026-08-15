@@ -1,4 +1,4 @@
-import { isValidUrl, savedAgo } from "./utils.js";
+import { isValidUrl, savedAgo, apiErrorMessage } from "./utils.js";
 import { storage } from "./storage.js";
 import { apiFetch, lookupUrl } from "./api.js";
 import {
@@ -56,11 +56,14 @@ let existingUrlRecord = null;
 // The page being saved (the readonly URL field became a title display)
 let currentUrl = "";
 
-// UI state management
 async function showUrlForm() {
   $.keyForm.style.display = "none";
 
-  const ready = prepareUrlForm();
+  // The catch keeps the reveal below unconditional: an unexpected
+  // rejection would otherwise leave the popup permanently blank.
+  const ready = prepareUrlForm().catch((error) => {
+    console.error("Popup init failed:", error);
+  });
 
   // Reveal only once the lookup has composed the final layout, so the
   // saved header and folder cards never pop into place after first
@@ -128,12 +131,11 @@ function showPageInfo(title, url) {
   $.pageUrl.style.display = title ? "" : "none";
 }
 
-// The already-saved header ("Saved 3 days ago") - pass null for a new link
 function showSavedStatus(record) {
   const saved = Boolean(record?.id);
   $.savedStatus.style.display = saved ? "" : "none";
   $.savedStatusText.textContent = saved ? savedAgo(record.saved_at) : "";
-  $.saveButton.textContent = saved ? "Save changes" : "Save";
+  refreshSaveButton();
 }
 
 function setMyLinks(checked) {
@@ -150,10 +152,10 @@ function syncMyLinksState() {
   updateSaveGuard();
 }
 
-// A save must go somewhere: block Save when My Links is off and no folder
-// cards exist
+// A save must go somewhere
 function updateSaveGuard() {
-  $.saveButton.disabled = !$.myLinksCheck.checked && placementCount() === 0;
+  $.saveButton.disabled =
+    saveBusy || (!$.myLinksCheck.checked && placementCount() === 0);
 }
 
 function showResult(message) {
@@ -189,50 +191,38 @@ async function handleUrlSubmit(e) {
   setSaveBusy(true);
 
   try {
-    const { user_tag_ids, tag_names } = getSelectedTags($.tagsSelect);
-    const placements = getPlacements();
     const my_links = $.myLinksCheck.checked;
+    // A folder-only save must not send the hidden field's tags - the API
+    // would create the user tags without attaching them to anything.
+    const { user_tag_ids, tag_names } = my_links
+      ? getSelectedTags($.tagsSelect)
+      : { user_tag_ids: [], tag_names: [] };
 
-    let response;
+    // Full desired state: a removed card removes that placement
+    // server-side, and my_links false trashes the personal save.
+    const payload = {
+      user_tag_ids,
+      tag_names,
+      my_links,
+      placements: getPlacements(),
+    };
 
-    if (existingUrlRecord && existingUrlRecord.id) {
-      // Update existing link. The placements array is the full desired
-      // state: a card the user removed means the server removes that
-      // folder placement, and my_links false moves the personal save
-      // to trash.
-      response = await apiFetch(`/user_bookmarks/${existingUrlRecord.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          user_bookmark: {
-            user_tag_ids,
-            tag_names,
-            my_links,
-            placements,
-          },
-        }),
-      });
-    } else {
-      // Create new link
-      response = await apiFetch("/urls", {
-        method: "POST",
-        body: JSON.stringify({
-          url: {
-            url: currentUrl,
-            user_tag_ids,
-            tag_names,
-            my_links,
-            placements,
-          },
-        }),
-      });
-    }
+    const response = existingUrlRecord?.id
+      ? await apiFetch(`/user_bookmarks/${existingUrlRecord.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ user_bookmark: payload }),
+        })
+      : await apiFetch("/urls", {
+          method: "POST",
+          body: JSON.stringify({ url: { url: currentUrl, ...payload } }),
+        });
 
     if (response.ok) {
       flashSaved();
     } else {
-      const errorText = await response.text().catch(() => "");
+      const body = await response.text().catch(() => "");
       showResult(
-        `Error ${response.status}: ${response.statusText}. ${errorText}`,
+        `Error ${response.status}: ${apiErrorMessage(body, response.statusText)}`,
       );
       setSaveBusy(false);
     }
@@ -244,14 +234,20 @@ async function handleUrlSubmit(e) {
 
 // Save feedback lives in the button so the popup never grows on success;
 // the result area below is for errors only
+let saveBusy = false;
+
 function saveIdleLabel() {
   return existingUrlRecord?.id ? "Save changes" : "Save";
 }
 
+function refreshSaveButton() {
+  $.saveButton.textContent = saveBusy ? "Saving…" : saveIdleLabel();
+  updateSaveGuard();
+}
+
 function setSaveBusy(busy) {
-  $.saveButton.disabled = busy;
-  $.saveButton.textContent = busy ? "Saving…" : saveIdleLabel();
-  if (!busy) updateSaveGuard();
+  saveBusy = busy;
+  refreshSaveButton();
 }
 
 function flashSaved() {
