@@ -59,8 +59,24 @@ let currentUrl = "";
 // UI state management
 async function showUrlForm() {
   $.keyForm.style.display = "none";
-  $.urlForm.style.display = "block";
 
+  const ready = prepareUrlForm();
+
+  // Reveal only once the lookup has composed the final layout, so the
+  // saved header and folder cards never pop into place after first
+  // paint. The cap keeps a slow network from holding the popup blank -
+  // then late data pops in, the rare case instead of every open.
+  await Promise.race([ready, sleep(400)]);
+  $.urlForm.style.display = "block";
+  await ready;
+
+  // Prevent tag input from stealing focus on popup open —
+  // deferred because the browser autofocuses the first editable
+  // input (the readonly URL field is skipped) after our code runs.
+  setTimeout(() => blurTagSelect(), 0);
+}
+
+async function prepareUrlForm() {
   const [tab] = await Promise.all([
     getActiveTab(),
     initTagsSelect($.tagsSelect, apiFetch),
@@ -89,19 +105,14 @@ async function showUrlForm() {
       hydratePlacements(record.placements);
       setMyLinks(record.my_links !== false);
       showSavedStatus(record);
-
-      showResult("");
-    } else {
-      showResult(""); // clear any old message
     }
-  } else {
-    showResult(""); // clear if URL is invalid or missing
   }
 
-  // Prevent tag input from stealing focus on popup open —
-  // deferred because the browser autofocuses the first editable
-  // input (the readonly URL field is skipped) after our code runs.
-  setTimeout(() => blurTagSelect(), 0);
+  showResult(""); // clear any old message
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function showKeyForm(message = "") {
