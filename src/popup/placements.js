@@ -110,7 +110,16 @@ async function openFolderPicker() {
 
   $.addButton.disabled = true;
 
-  const folders = normalizeFolders(await fetchFolders()).filter(
+  const fetched = await fetchFolders();
+  if (fetched === null) {
+    // Transient failure must stay retryable - only a real empty list may
+    // dead-end the button
+    $.addButton.textContent = "Couldn't load folders. Try again";
+    $.addButton.disabled = false;
+    return;
+  }
+
+  const folders = normalizeFolders(fetched).filter(
     (folder) => !cards.has(folder.id),
   );
 

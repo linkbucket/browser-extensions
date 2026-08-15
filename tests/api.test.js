@@ -139,21 +139,21 @@ describe("fetchFolders", () => {
     expect(await fetchFolders()).toEqual(body);
   });
 
-  it("returns an empty array and logs on a non-OK response", async () => {
+  it("returns null and logs on a non-OK response", async () => {
     fetchMock.mockResolvedValue({
       ok: false,
       status: 403,
       statusText: "Forbidden",
     });
 
-    expect(await fetchFolders()).toEqual([]);
+    expect(await fetchFolders()).toBeNull();
     expect(errorSpy).toHaveBeenCalled();
   });
 
-  it("returns an empty array and logs on a network error", async () => {
+  it("returns null and logs on a network error", async () => {
     fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
 
-    await expect(fetchFolders()).resolves.toEqual([]);
+    await expect(fetchFolders()).resolves.toBeNull();
     expect(errorSpy).toHaveBeenCalled();
   });
 });
