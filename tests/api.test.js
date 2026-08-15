@@ -130,7 +130,11 @@ describe("fetchFolders", () => {
         member_count: 1,
       },
     ];
-    fetchMock.mockResolvedValue({ ok: true, status: 200, json: async () => body });
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => body,
+    });
 
     expect(await fetchFolders()).toEqual(body);
   });
