@@ -367,6 +367,16 @@ button[type="submit"]:disabled {
   opacity: 0.5;
 }
 
+/* Fixed box for the label swap (Save / Saving… / Saved ✓): min-width
+   fits the widest state, fixed height keeps the ✓ glyph's taller line
+   from nudging the popup by a pixel */
+#saveButton {
+  min-width: 172px;
+  height: 42px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 /* Text-style secondary action */
 #resetKeys {
   color: #1144aa;

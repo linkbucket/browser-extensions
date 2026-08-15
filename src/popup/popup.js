@@ -174,7 +174,8 @@ async function handleUrlSubmit(e) {
     return;
   }
 
-  showResult("Saving...");
+  showResult("");
+  setSaveBusy(true);
 
   try {
     const { user_tag_ids, tag_names } = getSelectedTags($.tagsSelect);
@@ -216,20 +217,35 @@ async function handleUrlSubmit(e) {
     }
 
     if (response.ok) {
-      if (existingUrlRecord && existingUrlRecord.id) {
-        showResult("Success! Link updated.");
-      } else {
-        showResult("Success! Link added.");
-      }
+      flashSaved();
     } else {
       const errorText = await response.text().catch(() => "");
       showResult(
         `Error ${response.status}: ${response.statusText}. ${errorText}`,
       );
+      setSaveBusy(false);
     }
   } catch (error) {
     showResult(`Network error: ${error?.message || String(error)}`);
+    setSaveBusy(false);
   }
+}
+
+// Save feedback lives in the button so the popup never grows on success;
+// the result area below is for errors only
+function saveIdleLabel() {
+  return existingUrlRecord?.id ? "Save changes" : "Save";
+}
+
+function setSaveBusy(busy) {
+  $.saveButton.disabled = busy;
+  $.saveButton.textContent = busy ? "Saving…" : saveIdleLabel();
+  if (!busy) updateSaveGuard();
+}
+
+function flashSaved() {
+  $.saveButton.textContent = "Saved ✓";
+  setTimeout(() => setSaveBusy(false), 1600);
 }
 
 async function handleResetKeys() {
