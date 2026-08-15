@@ -52,6 +52,8 @@ let existingUrlRecord = null;
 
 let currentUrl = "";
 
+let initPending = false;
+
 async function showUrlForm() {
   $.keyForm.style.display = "none";
 
@@ -76,6 +78,19 @@ async function showUrlForm() {
 }
 
 async function prepareUrlForm() {
+  // Gates Save while the lookup is pending: the reveal cap can show the
+  // form early, and a save before the lookup lands would POST instead of
+  // updating (and the late lookup would rewrite the form mid-save)
+  initPending = true;
+  try {
+    await composeUrlForm();
+  } finally {
+    initPending = false;
+    refreshSaveButton();
+  }
+}
+
+async function composeUrlForm() {
   const [tab] = await Promise.all([
     getActiveTab(),
     initTagsSelect($.tagsSelect, apiFetch),
@@ -155,7 +170,7 @@ function removalIntent() {
 
 function updateSaveGuard() {
   $.saveButton.disabled =
-    saveBusy || (!existingUrlRecord?.id && nothingSelected());
+    saveBusy || initPending || (!existingUrlRecord?.id && nothingSelected());
 }
 
 function showResult(message) {
@@ -225,6 +240,16 @@ async function handleUrlSubmit(e) {
         existingUrlRecord = null;
         setMyLinks(true);
         showSavedStatus(null);
+      } else if (!existingUrlRecord?.id) {
+        // Switch a first save to update mode: POST is additive, so a
+        // follow-up save could never remove a card without the bookmark
+        // id. Deferred saves (no bookmark yet) stay in create mode, where
+        // additive is the only possible semantics anyway.
+        const record = await lookupUrl(currentUrl);
+        if (record?.id) {
+          existingUrlRecord = record;
+          showSavedStatus(record);
+        }
       }
       flashSaved(removing);
     } else {
