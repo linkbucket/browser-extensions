@@ -70,6 +70,7 @@ async function showUrlForm() {
   await Promise.race([ready, sleep(400)]);
   $.urlForm.style.display = "block";
   await ready;
+  persistPopupHeight();
 
   // Prevent tag input from stealing focus on popup open —
   // deferred because the browser autofocuses the first editable
@@ -129,6 +130,21 @@ function showKeyForm(message = "") {
   $.keyForm.style.display = "block";
   $.urlForm.style.display = "none";
   $.resultDiv.textContent = message;
+  persistPopupHeight();
+}
+
+// Counterpart to restore-height.js: runs at each form reveal, so a
+// stale height corrects itself once, with content visible.
+function persistPopupHeight() {
+  document.documentElement.style.minHeight = "";
+  try {
+    localStorage.setItem(
+      "popupHeight",
+      String(document.documentElement.offsetHeight),
+    );
+  } catch {
+    // No storage access: the next open just starts small.
+  }
 }
 
 function showPageInfo(title, url) {
