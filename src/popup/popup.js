@@ -133,9 +133,8 @@ function showKeyForm(message = "") {
   persistPopupHeight();
 }
 
-// Counterpart to restore-height.js: drop the pre-paint min-height and
-// store the natural height for the next open. Runs on every form
-// reveal, so a stale height corrects itself once, with content visible.
+// Counterpart to restore-height.js: runs at each form reveal, so a
+// stale height corrects itself once, with content visible.
 function persistPopupHeight() {
   document.documentElement.style.minHeight = "";
   try {
