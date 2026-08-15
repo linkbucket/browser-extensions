@@ -140,13 +140,22 @@ function syncMyLinksState() {
   const on = $.myLinksCheck.checked;
   $.myLinksCard.classList.toggle("placement-card--off", !on);
   $.myLinksMeta.textContent = on ? "private" : "not saved here";
-  updateSaveGuard();
+  refreshSaveButton();
 }
 
-// A save must go somewhere
+function nothingSelected() {
+  return !$.myLinksCheck.checked && placementCount() === 0;
+}
+
+// Deselecting everything on a saved link is an explicit removal (the
+// button offers "Move to trash"); on a new link there is nothing to do
+function removalIntent() {
+  return Boolean(existingUrlRecord?.id) && nothingSelected();
+}
+
 function updateSaveGuard() {
   $.saveButton.disabled =
-    saveBusy || (!$.myLinksCheck.checked && placementCount() === 0);
+    saveBusy || (!existingUrlRecord?.id && nothingSelected());
 }
 
 function showResult(message) {
@@ -178,6 +187,7 @@ async function handleUrlSubmit(e) {
   }
 
   showResult("");
+  const removing = removalIntent();
   setSaveBusy(true);
 
   try {
@@ -208,7 +218,15 @@ async function handleUrlSubmit(e) {
         });
 
     if (response.ok) {
-      flashSaved();
+      if (removing) {
+        // The link is in trash everywhere now; the popup becomes a fresh
+        // save form so a change of heart re-saves via POST (which also
+        // restores a trashed My Links save).
+        existingUrlRecord = null;
+        setMyLinks(true);
+        showSavedStatus(null);
+      }
+      flashSaved(removing);
     } else {
       const body = await response.text().catch(() => "");
       showResult(
@@ -227,11 +245,16 @@ async function handleUrlSubmit(e) {
 let saveBusy = false;
 
 function saveIdleLabel() {
+  if (removalIntent()) return "Move to trash";
   return existingUrlRecord?.id ? "Save changes" : "Save";
 }
 
 function refreshSaveButton() {
-  $.saveButton.textContent = saveBusy ? "Saving…" : saveIdleLabel();
+  $.saveButton.textContent = saveBusy
+    ? removalIntent()
+      ? "Removing…"
+      : "Saving…"
+    : saveIdleLabel();
   updateSaveGuard();
 }
 
@@ -240,8 +263,8 @@ function setSaveBusy(busy) {
   refreshSaveButton();
 }
 
-function flashSaved() {
-  $.saveButton.textContent = "Saved ✓";
+function flashSaved(removed) {
+  $.saveButton.textContent = removed ? "Removed ✓" : "Saved ✓";
   setTimeout(() => setSaveBusy(false), 1600);
 }
 
@@ -282,7 +305,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     template: document.getElementById("folder-card-template"),
     addButton: document.getElementById("addFolder"),
     picker: document.getElementById("folderPicker"),
-    changed: updateSaveGuard,
+    changed: refreshSaveButton,
   });
 
   $.myLinksCheck.addEventListener("change", syncMyLinksState);

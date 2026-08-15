@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Tag suggestions open downward and size themselves to the room below the field
 - The folder picker is the same searchable Tom Select control as the tag fields
 - An already-saved link opens with a green check and "Saved N days ago", and its button reads "Save changes"
+- Deselecting every place on a saved link turns the button into "Move to trash"
 - Compact restyle following the design explorations: smaller fields and spacing, and a bucket mark + wordmark header replacing the large illustration
 
 ## [0.4.2]
