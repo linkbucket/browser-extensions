@@ -35,7 +35,7 @@ export function createTagSelect(selectElement, load) {
 
     onItemAdd: function () {
       this.setTextboxValue("");
-      this.refreshOptions();
+      this.close();
     },
 
     // Validate tag format - lowercase alphanumeric with hyphens
