@@ -175,6 +175,26 @@ form input:focus {
   white-space: nowrap;
 }
 
+/* Browser page (no title or URL): the card explains, so let it wrap */
+.pageinfo--notice .pageinfo__url {
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+/* Page Linkbucket can't save: the page card and why, no save controls */
+.unsaveable-note {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+
+.url-form--unsaveable #my-links-card,
+.url-form--unsaveable #folder-cards,
+.url-form--unsaveable #add-folder-row,
+.url-form--unsaveable #saveButton {
+  display: none;
+}
+
 /* Placement cards (My Links + one per folder) */
 .placement-card {
   padding: 16px;

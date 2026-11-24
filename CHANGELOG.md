@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+- Pages Linkbucket can't save (browser pages such as new tab or settings, and http:// pages) say why instead of showing an empty page card and a Save that always fails
+
 ## [0.5.2]
 
 - Close the tag suggestions after a tag is picked (click, Enter or Tab); typing reopens the list
