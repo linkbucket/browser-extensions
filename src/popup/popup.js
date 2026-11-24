@@ -33,8 +33,10 @@ async function getActiveTab() {
 const $ = {
   keyForm: null,
   urlForm: null,
+  pageInfo: null,
   pageTitle: null,
   pageUrl: null,
+  unsaveableNote: null,
   savedStatus: null,
   savedStatusText: null,
   resultDiv: null,
@@ -70,7 +72,7 @@ async function showUrlForm() {
   await Promise.race([ready, sleep(400)]);
   $.urlForm.style.display = "block";
   await ready;
-  persistPopupHeight();
+  persistPopupHeight({ store: isValidUrl(currentUrl) });
 
   // Prevent tag input from stealing focus on popup open —
   // deferred because the browser autofocuses the first editable
@@ -134,9 +136,12 @@ function showKeyForm(message = "") {
 }
 
 // Counterpart to restore-height.js: runs at each form reveal, so a
-// stale height corrects itself once, with content visible.
-function persistPopupHeight() {
+// stale height corrects itself once, with content visible. The short
+// can't-save notice passes store: false - stored, it would open the
+// next save form clipped, snapping to size (#84).
+function persistPopupHeight({ store = true } = {}) {
   document.documentElement.style.minHeight = "";
+  if (!store) return;
   try {
     localStorage.setItem(
       "popupHeight",
@@ -148,10 +153,22 @@ function persistPopupHeight() {
 }
 
 function showPageInfo(title, url) {
-  $.pageTitle.textContent = title || url;
-  $.pageUrl.textContent = url;
+  // The browser withholds its own pages (brave://, chrome://, new tab,
+  // about:) from activeTab: no title and no URL, so say why instead
+  const known = Boolean(url);
+  $.pageTitle.textContent = known ? title || url : "This page can't be saved";
+  $.pageUrl.textContent = known
+    ? url
+    : "Linkbucket saves https:// pages; browser pages are off limits.";
   // With no title the URL takes its place; don't repeat it below
-  $.pageUrl.style.display = title ? "" : "none";
+  $.pageUrl.style.display = title || !known ? "" : "none";
+  $.pageInfo.classList.toggle("pageinfo--notice", !known);
+
+  // A page that can't be saved gets no save controls - only the page
+  // card and the reason, rather than a form whose Save always fails
+  const saveable = isValidUrl(url);
+  $.urlForm.classList.toggle("url-form--unsaveable", !saveable);
+  $.unsaveableNote.style.display = known && !saveable ? "" : "none";
 }
 
 function showSavedStatus(record) {
@@ -327,8 +344,10 @@ async function handleResetKeys() {
 document.addEventListener("DOMContentLoaded", async () => {
   $.keyForm = document.getElementById("key-form");
   $.urlForm = document.getElementById("url-form");
+  $.pageInfo = document.getElementById("pageInfo");
   $.pageTitle = document.getElementById("pageTitle");
   $.pageUrl = document.getElementById("pageUrl");
+  $.unsaveableNote = document.getElementById("unsaveableNote");
   $.savedStatus = document.getElementById("savedStatus");
   $.savedStatusText = document.getElementById("savedStatusText");
   $.resultDiv = document.getElementById("result");
